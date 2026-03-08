@@ -15,7 +15,7 @@ const router = createRouter({
       component: AppLayout,
       children: [
         { path: 'dashboard', name: 'dashboard', component: DashboardView, meta: { title: 'Dashboard' } },
-        { path: 'roles', name: 'roles', component: RoleManagementView, meta: { title: 'Roles' } },
+        { path: 'roles', name: 'roles', component: RoleManagementView, meta: { title: 'Gestionar Roles' } },
       ],
     },
   ],
