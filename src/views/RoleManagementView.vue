@@ -1,8 +1,9 @@
 <script setup>
 import { computed, ref } from 'vue'
 import Fuse from 'fuse.js'
-import { MagnifyingGlassIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/solid'
+import { PlusIcon, TrashIcon } from '@heroicons/vue/24/solid'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
+import SearchInput from '@/components/SearchInput.vue'
 
 const roles = [
   { id: 1, name: 'Test', description: 'Descripcion de test' },
@@ -83,21 +84,7 @@ function saveChanges() {
       class="flex flex-col shrink-0 bg-white w-86.25 h-full shadow-md rounded-4xl overflow-hidden"
     >
       <div class="border-b border-gray-300 p-8">
-        <div class="relative group">
-          <magnifying-glass-icon
-            class="absolute top-1/2 -translate-y-1/2 left-5 size-6 pointer-events-none"
-            :class="{
-              'text-black': roleSearch.length > 0,
-              'text-gray-500': roleSearch.length === 0,
-            }"
-          />
-          <input
-            class="w-full pr-5 pl-13.5 py-2.5 border-gray-300 bg-white border rounded-4xl placeholder:font-medium placeholder:text-gray-500"
-            type="text"
-            placeholder="Buscar Roles..."
-            v-model="roleSearch"
-          />
-        </div>
+        <search-input v-model="roleSearch" placeholder="Buscar Roles..." />
       </div>
       <div class="flex-1 min-h-62">
         <button
@@ -169,30 +156,12 @@ function saveChanges() {
 
         <!-- Search bar -->
         <div class="px-8 py-4 border-b border-gray-100">
-          <div class="relative flex items-center">
-            <magnifying-glass-icon
-              class="absolute left-4 size-5 text-gray-400 pointer-events-none"
-            />
-            <input
-              v-if="activeTab === 'zones'"
-              v-model="zoneSearch"
-              class="w-full pl-11 pr-12 py-2.5 border border-gray-200 rounded-4xl text-sm placeholder:text-gray-400 outline-none"
-              type="text"
-              placeholder="Buscar Zonas..."
-            />
-            <input
-              v-else
-              v-model="employeeSearch"
-              class="w-full pl-11 pr-12 py-2.5 border border-gray-200 rounded-4xl text-sm placeholder:text-gray-400 outline-none"
-              type="text"
-              placeholder="Buscar Empleados..."
-            />
-            <button
-              class="absolute right-4 size-6 rounded-full bg-gray-200 text-gray-500 text-xs font-bold flex items-center justify-center"
-            >
-              ?
-            </button>
-          </div>
+          <search-input
+            v-if="activeTab === 'zones'"
+            v-model="zoneSearch"
+            placeholder="Buscar Zonas..."
+          />
+          <search-input v-else v-model="employeeSearch" placeholder="Buscar Empleados..." />
         </div>
 
         <!-- Row list -->
