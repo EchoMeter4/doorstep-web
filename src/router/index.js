@@ -3,14 +3,21 @@ import LoginView from '@/views/LoginView.vue'
 import { useAuthStore } from '@/stores/auth.js'
 import DashboardView from '@/views/DashboardView.vue'
 import RoleManagementView from '@/views/RoleManagementView.vue'
+import AppLayout from '@/components/AppLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'login', component: LoginView },
-    { path: '/dashboard', name: 'dashboard', component: DashboardView },
-    { path: '/roles', name: 'roles', component: RoleManagementView},
+    {
+      path: '/',
+      component: AppLayout,
+      children: [
+        { path: 'dashboard', name: 'dashboard', component: DashboardView, meta: { title: 'Dashboard' } },
+        { path: 'roles', name: 'roles', component: RoleManagementView, meta: { title: 'Roles' } },
+      ],
+    },
   ],
 })
 

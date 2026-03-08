@@ -19,18 +19,18 @@ const sections = [
 
 <template>
   <div
-    class="w-70 shadow-2xl bg-brand-primary flex flex-col space-y-12.5 rounded-4xl px-8 py-12.5"
+    class="w-64 shadow-2xl bg-brand-primary flex flex-col space-y-10 rounded-4xl px-7 py-10"
   >
-    <logo-svg class="h-14 shrink-0" text-classes="text-white" />
-    <div class="flex flex-col space-y-8 w-full">
+    <logo-svg class="h-10 shrink-0" text-classes="text-white" />
+    <div class="flex flex-col space-y-1.5 w-full">
       <sidebar-button
         v-for="section in sections"
         :key="section.name"
         :route-name="section.routeName"
       >
-        <div class="flex flex-row items-center space-x-6">
-          <component :is="section.icon" class="size-8" />
-          <span class="capitalize">{{ section.name }} </span>
+        <div class="flex flex-row items-center space-x-3">
+          <component :is="section.icon" class="size-5" />
+          <span class="capitalize text-sm">{{ section.name }} </span>
         </div>
       </sidebar-button>
     </div>
