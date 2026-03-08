@@ -1,9 +1,7 @@
 <script setup></script>
 
 <template>
-  <div>
-    Bepis
-  </div>
+  <div>Bepis</div>
 </template>
 
 <style scoped></style>

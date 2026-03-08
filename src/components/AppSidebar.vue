@@ -1,7 +1,7 @@
 <script setup>
 import LogoSvg from '@/components/LogoSvg.vue'
 import SidebarButton from '@/components/SidebarButton.vue'
-import { ChartPieIcon, UserGroupIcon } from '@heroicons/vue/24/solid'
+import { ChartPieIcon, MapPinIcon, UserGroupIcon } from '@heroicons/vue/24/solid'
 
 const sections = [
   {
@@ -14,13 +14,16 @@ const sections = [
     icon: UserGroupIcon,
     routeName: 'roles',
   },
+  {
+    name: 'Zonas Restringidas',
+    icon: MapPinIcon,
+    routeName: 'zones',
+  },
 ]
 </script>
 
 <template>
-  <div
-    class="w-64 shadow-2xl bg-brand-primary flex flex-col space-y-10 rounded-4xl px-7 py-10"
-  >
+  <div class="w-64 shadow-2xl bg-brand-primary flex flex-col space-y-10 rounded-4xl px-7 py-10">
     <logo-svg class="h-10 shrink-0" text-classes="text-white" />
     <div class="flex flex-col space-y-1.5 w-full">
       <sidebar-button

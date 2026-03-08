@@ -7,7 +7,7 @@
   >
     <div
       class="relative h-5 aspect-9/5 rounded-full transition-colors duration-300"
-      :class="modelValue ? 'bg-green-400' : 'bg-gray-300'"
+      :class="modelValue ? 'bg-brand-secondary' : 'bg-gray-300'"
     >
       <span
         class="absolute top-1/2 left-0.5 h-4 aspect-square -translate-y-1/2 rounded-full bg-white shadow transition-transform duration-300"

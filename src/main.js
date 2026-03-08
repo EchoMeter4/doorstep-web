@@ -19,7 +19,7 @@ watch(
     if (user === null && router.currentRoute.value.name !== 'login') {
       return router.push({ name: 'login' })
     }
-  }
+  },
 )
 
 app.mount('#app')

@@ -3,6 +3,7 @@ import LoginView from '@/views/LoginView.vue'
 import { useAuthStore } from '@/stores/auth.js'
 import DashboardView from '@/views/DashboardView.vue'
 import RoleManagementView from '@/views/RoleManagementView.vue'
+import ZoneManagementView from '@/views/ZoneManagementView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 
 const router = createRouter({
@@ -14,8 +15,24 @@ const router = createRouter({
       path: '/',
       component: AppLayout,
       children: [
-        { path: 'dashboard', name: 'dashboard', component: DashboardView, meta: { title: 'Dashboard' } },
-        { path: 'roles', name: 'roles', component: RoleManagementView, meta: { title: 'Gestionar Roles' } },
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: DashboardView,
+          meta: { title: 'Dashboard' },
+        },
+        {
+          path: 'roles',
+          name: 'roles',
+          component: RoleManagementView,
+          meta: { title: 'Gestionar Roles' },
+        },
+        {
+          path: 'zones',
+          name: 'zones',
+          component: ZoneManagementView,
+          meta: { title: 'Gestión de Zonas Restringidas' },
+        },
       ],
     },
   ],
@@ -26,7 +43,7 @@ router.beforeEach(async (to) => {
   try {
     await auth.me()
   } catch (e) {
-      console.error('Error fetching user:', e)
+    console.error('Error fetching user:', e)
   }
 
   if (to.name !== 'login' && !auth.user) {
