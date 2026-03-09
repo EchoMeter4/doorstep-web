@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth.js'
 import DashboardView from '@/views/DashboardView.vue'
 import RoleManagementView from '@/views/RoleManagementView.vue'
 import ZoneManagementView from '@/views/ZoneManagementView.vue'
+import UserManagementView from '@/views/UserManagementView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 
 const router = createRouter({
@@ -32,6 +33,12 @@ const router = createRouter({
           name: 'zones',
           component: ZoneManagementView,
           meta: { title: 'Gestión de Zonas Restringidas' },
+        },
+        {
+          path: 'users',
+          name: 'users',
+          component: UserManagementView,
+          meta: { title: 'Gestión de Usuarios' },
         },
       ],
     },

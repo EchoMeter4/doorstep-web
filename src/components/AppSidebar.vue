@@ -1,13 +1,18 @@
 <script setup>
 import LogoSvg from '@/components/LogoSvg.vue'
 import SidebarButton from '@/components/SidebarButton.vue'
-import { ChartPieIcon, MapPinIcon, UserGroupIcon } from '@heroicons/vue/24/solid'
+import { ChartPieIcon, MapPinIcon, UserGroupIcon, UsersIcon } from '@heroicons/vue/24/solid'
 
 const sections = [
   {
     name: 'Dashboard',
     icon: ChartPieIcon,
     routeName: 'dashboard',
+  },
+  {
+    name: 'Usuarios',
+    icon: UsersIcon,
+    routeName: 'users',
   },
   {
     name: 'Roles',
