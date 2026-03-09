@@ -23,7 +23,7 @@ const sections = [
 </script>
 
 <template>
-  <div class="w-64 shadow-2xl bg-brand-primary flex flex-col space-y-10 rounded-4xl px-7 py-10">
+  <div class="w-64 bg-brand-primary flex flex-col space-y-10 rounded-4xl px-7 py-10 shadow-sm">
     <logo-svg class="h-12 shrink-0" text-classes="text-white" />
     <div class="flex flex-col space-y-1.5 w-full">
       <sidebar-button

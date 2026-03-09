@@ -12,7 +12,7 @@ const route = useRoute()
       <div class="flex flex-row min-h-full min-w-full w-fit p-2.5 space-x-2.5">
         <AppSidebar class="min-h-fit" />
         <div class="flex-1 flex flex-col space-y-2.5">
-          <AppNavbar :title="route.meta.title ?? ''" class="sticky top-0 z-100 shadow-md" />
+          <AppNavbar :title="route.meta.title ?? ''" class="sticky top-0 z-100" />
           <RouterView />
         </div>
       </div>
