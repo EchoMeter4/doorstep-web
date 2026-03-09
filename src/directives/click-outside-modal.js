@@ -16,6 +16,7 @@ export default {
       while (currentElement) {
         let checks = [
           currentElement.hasAttribute && currentElement.hasAttribute('data-click-outside-ignore'),
+
           currentElement.classList && currentElement.classList.contains('mx-datepicker-main'),
         ]
 
