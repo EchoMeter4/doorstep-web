@@ -15,6 +15,7 @@ const route = useRoute()
           <AppNavbar :title="route.meta.title ?? ''" class="sticky top-0 z-100" />
           <RouterView />
         </div>
+        <div id="modal" class="z-1000 fixed left-0 top-0"></div>
       </div>
     </main>
   </div>
