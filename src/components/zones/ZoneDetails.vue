@@ -10,9 +10,10 @@ import {
   UserIcon,
   UsersIcon,
 } from '@heroicons/vue/24/solid'
-import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import SearchInput from '@/components/SearchInput.vue'
 import IconBadge from '@/components/IconBadge.vue'
+import SearchableToggleList from '@/components/SearchableToggleList.vue'
+import PendingChangesBar from '@/components/PendingChangesBar.vue'
 
 const props = defineProps({
   zone: {
@@ -131,14 +132,6 @@ const tabDefs = [
 
 // --- Tabs & search ---
 const activeTab = ref(tabs.DETAILS)
-const roleSearch = ref('')
-
-const filteredRoles = computed(() => {
-  const cleanInput = roleSearch.value.trim()
-  if (cleanInput.length === 0) return roleItems.value
-  const fuse = new Fuse(roleItems.value, { keys: ['name'], threshold: 0.4 })
-  return fuse.search(cleanInput).map((r) => r.item)
-})
 
 const guestSearch = ref('')
 
@@ -295,32 +288,11 @@ function deleteZone() {
           </div>
 
           <!-- Roles Permitidos tab -->
-          <div v-else-if="activeTab === tabs.ROLES" class="flex flex-col h-full">
-            <!-- Search bar -->
-            <div class="px-8 py-4 border-b border-gray-100 sticky top-0 z-10 bg-white">
-              <search-input v-model="roleSearch" placeholder="Buscar roles permitidos..." />
-            </div>
-
-            <!-- Role rows -->
-            <div class="flex flex-col divide-y divide-gray-100">
-              <div
-                v-for="role in filteredRoles"
-                :key="role.id"
-                class="relative flex items-center justify-between px-10 h-16"
-              >
-                <!-- Pending change orange stripe -->
-                <div
-                  v-if="role.enabled !== role.original"
-                  class="absolute left-0 top-0 h-full w-3 bg-orange-200"
-                />
-                <div class="flex flex-col min-w-0">
-                  <span class="text-sm">{{ role.name }}</span>
-                  <span class="text-xs text-gray-400 truncate">{{ role.description }}</span>
-                </div>
-                <toggle-switch v-model="role.enabled" />
-              </div>
-            </div>
-          </div>
+          <searchable-toggle-list
+            v-else-if="activeTab === tabs.ROLES"
+            :items="roleItems"
+            placeholder="Buscar roles permitidos..."
+          />
 
           <!-- Invitados tab -->
           <div v-else-if="activeTab === tabs.GUESTS" class="flex flex-col h-full">
@@ -366,28 +338,11 @@ function deleteZone() {
           </div>
         </div>
 
-        <!-- Pending changes floating bar -->
-        <div v-if="hasPendingChanges" class="px-4 absolute bottom-3 w-full">
-          <div
-            class="flex items-center justify-between bg-white rounded-4xl shadow-lg px-6 py-3 border border-gray-100 w-full"
-          >
-            <span class="text-sm text-gray-700">Tienes cambios pendientes</span>
-            <div class="flex flex-row">
-              <button
-                class="text-gray-500 hover:text-gray-800 hover:underline text-sm px-5 py-2"
-                @click="discardChanges"
-              >
-                Descartar
-              </button>
-              <button
-                class="bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-5 py-2 rounded-4xl transition-colors"
-                @click="saveChanges"
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
+        <pending-changes-bar
+          :visible="hasPendingChanges"
+          @save="saveChanges"
+          @discard="discardChanges"
+        />
       </div>
     </div>
   </div>
