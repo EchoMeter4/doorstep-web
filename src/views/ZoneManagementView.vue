@@ -160,7 +160,7 @@ function closeDetailsModal() {
     <!-- Main content card -->
     <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
       <!-- Filter bar -->
-      <div class="px-6 pt-4 pb-3 border-b border-gray-100 flex flex-col gap-3">
+      <div class="px-6 pt-4 pb-3 flex flex-col gap-3">
         <!-- search + filters + add button -->
         <div class="flex items-center gap-3">
           <search-input v-model="search" placeholder="Buscar zona..." class="flex-1" />

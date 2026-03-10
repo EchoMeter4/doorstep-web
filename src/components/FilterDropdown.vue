@@ -31,7 +31,7 @@ function select(key) {
 <template>
   <div class="relative" v-click-outside-modal="close">
     <button
-      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border transition-colors"
+      class="bg-white w-full inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border transition-colors"
       :class="
         isActive
           ? 'border-brand-secondary bg-brand-secondary/5 text-brand-secondary'
@@ -44,7 +44,7 @@ function select(key) {
     </button>
     <div
       v-if="isOpen"
-      class="absolute left-0 top-full mt-1 z-10 bg-white rounded-xl shadow-lg border border-gray-100 py-1 min-w-36"
+      class="absolute left-0 top-full mt-1 z-10 bg-white rounded-xl shadow-lg border border-gray-100 py-1 min-w-36 w-full"
     >
       <button
         v-for="option in options"

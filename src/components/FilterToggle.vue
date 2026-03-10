@@ -16,7 +16,7 @@ function toggle() {
 
 <template>
   <button
-    class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-full border transition-colors"
+    class="bg-white inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-full border transition-colors"
     :class="modelValue === value ? activeClass : 'border-gray-200 text-gray-500 hover:bg-gray-100'"
     @click="toggle"
   >

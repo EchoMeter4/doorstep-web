@@ -1,7 +1,7 @@
 <script setup>
 import LogoSvg from '@/components/LogoSvg.vue'
 import SidebarButton from '@/components/SidebarButton.vue'
-import { ChartPieIcon, MapPinIcon, UserGroupIcon, UsersIcon } from '@heroicons/vue/24/solid'
+import { ChartPieIcon, ClipboardDocumentListIcon, MapPinIcon, UserGroupIcon, UsersIcon } from '@heroicons/vue/24/solid'
 
 const sections = [
   {
@@ -23,6 +23,11 @@ const sections = [
     name: 'Zonas Restringidas',
     icon: MapPinIcon,
     routeName: 'zones',
+  },
+  {
+    name: 'Registros de Acceso',
+    icon: ClipboardDocumentListIcon,
+    routeName: 'logs',
   },
 ]
 </script>
