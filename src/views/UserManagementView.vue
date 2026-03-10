@@ -8,6 +8,7 @@ import FilterDropdown from '@/components/FilterDropdown.vue'
 import OverflowBadgeList from '@/components/OverflowBadgeList.vue'
 import PillSelect from '@/components/PillSelect.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import BaseTable from '@/components/BaseTable.vue'
 import UserDetails from '@/components/users/UserDetails.vue'
 
 // Shared plate pool
@@ -141,7 +142,11 @@ const fuse = new Fuse(users.value, { keys: ['name'], threshold: 0.4 })
 
 const allRoleNames = computed(() => {
   const names = new Set()
-  users.value.forEach((u) => u.roles.forEach((r) => { if (r.enabled) names.add(r.name) }))
+  users.value.forEach((u) =>
+    u.roles.forEach((r) => {
+      if (r.enabled) names.add(r.name)
+    }),
+  )
   return Array.from(names).sort()
 })
 
@@ -195,95 +200,90 @@ function handleDelete(user) {
 
     <!-- Main content card -->
     <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
-      <!-- Filter bar -->
-      <div class="px-6 pt-4 pb-3 border-b border-gray-100 flex flex-col gap-3">
-        <div class="flex items-center gap-3">
-          <search-input v-model="search" placeholder="Buscar usuario..." class="flex-1" />
-          <filter-dropdown v-model="activeRoleFilter" label="Rol" :options="roleFilterOptions" />
-          <div class="flex flex-row items-center gap-2">
-            <filter-toggle
-              v-model="activeStatusFilter"
-              label="Activo"
-              value="active"
-              :count="activeUsers"
-              dot-class="bg-green-500"
-              active-class="border-green-300 bg-green-50 text-green-700"
-            />
-            <filter-toggle
-              v-model="activeStatusFilter"
-              label="Inactivo"
-              value="inactive"
-              :count="inactiveUsers"
-              dot-class="bg-gray-400"
-              active-class="border-gray-400 bg-gray-100 text-gray-700"
-            />
+      <base-table
+        :columns="['usuario', 'roles', 'placas', 'credencial', 'estatus']"
+        grid-cols="grid-cols-[22%_22%_18%_24%_14%]"
+      >
+        <template #filters>
+          <div class="flex items-center gap-3">
+            <search-input v-model="search" placeholder="Buscar usuario..." class="flex-1" />
+            <filter-dropdown v-model="activeRoleFilter" label="Rol" :options="roleFilterOptions" />
+            <div class="flex flex-row items-center gap-2">
+              <filter-toggle
+                v-model="activeStatusFilter"
+                label="Activo"
+                value="active"
+                :count="activeUsers"
+                dot-class="bg-green-500"
+                active-class="border-green-300 bg-green-50 text-green-700"
+              />
+              <filter-toggle
+                v-model="activeStatusFilter"
+                label="Inactivo"
+                value="inactive"
+                :count="inactiveUsers"
+                dot-class="bg-gray-400"
+                active-class="border-gray-400 bg-gray-100 text-gray-700"
+              />
+            </div>
+            <button
+              class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+            >
+              <plus-icon class="size-4" />
+              Agregar Usuario
+            </button>
           </div>
-          <button
-            class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
-          >
-            <plus-icon class="size-4" />
-            Agregar Usuario
-          </button>
-        </div>
-      </div>
+        </template>
 
-      <!-- Data grid -->
-      <div class="min-h-0 overflow-auto">
-        <!-- Header row -->
-        <div
-          class="grid grid-cols-[22%_22%_18%_24%_14%] bg-brand-primary-700 py-5 text-xs font-semibold text-white uppercase tracking-wider"
-        >
+        <template #rows>
           <div
-            v-for="header in ['usuario', 'roles', 'placas', 'credencial', 'estatus']"
-            :key="header"
-            class="px-6"
+            v-for="user in filteredUsers"
+            :key="user.id"
+            class="grid grid-cols-[22%_22%_18%_24%_14%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+            role="button"
+            @click="openDetailsModal(user)"
           >
-            {{ header }}
-          </div>
-        </div>
+            <!-- User name -->
+            <div class="px-6 py-4">
+              <p class="text-sm font-medium text-gray-900">{{ user.name }}</p>
+            </div>
 
-        <!-- Data rows -->
-        <div
-          v-for="user in filteredUsers"
-          :key="user.id"
-          class="grid grid-cols-[22%_22%_18%_24%_14%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
-          role="button"
-          @click="openDetailsModal(user)"
-        >
-          <!-- User name -->
-          <div class="px-6 py-4">
-            <p class="text-sm font-medium text-gray-900">{{ user.name }}</p>
-          </div>
+            <!-- Roles -->
+            <div class="px-6 py-4">
+              <overflow-badge-list
+                :items="user.roles.filter((r) => r.enabled).map((r) => r.name)"
+              />
+            </div>
 
-          <!-- Roles -->
-          <div class="px-6 py-4">
-            <overflow-badge-list :items="user.roles.filter((r) => r.enabled).map((r) => r.name)" />
-          </div>
+            <!-- Plates -->
+            <div class="px-6 py-4">
+              <overflow-badge-list
+                :items="user.plates.filter((p) => p.enabled).map((p) => p.name)"
+              />
+            </div>
 
-          <!-- Plates -->
-          <div class="px-6 py-4">
-            <overflow-badge-list :items="user.plates.filter((p) => p.enabled).map((p) => p.name)" />
-          </div>
+            <!-- Credential -->
+            <div class="px-6 py-4">
+              <span v-if="user.credential" class="text-sm text-gray-700">
+                {{ user.credential.type }} · {{ user.credential.number }}
+              </span>
+              <span v-else class="text-sm text-gray-300">Sin credencial</span>
+            </div>
 
-          <!-- Credential -->
-          <div class="px-6 py-4">
-            <span v-if="user.credential" class="text-sm text-gray-700">
-              {{ user.credential.type }} · {{ user.credential.number }}
-            </span>
-            <span v-else class="text-sm text-gray-300">Sin credencial</span>
+            <!-- Status pill -->
+            <div class="px-6 py-4 w-full">
+              <pill-select v-model="user.enabled" :options="userStatusOptions" />
+            </div>
           </div>
 
-          <!-- Status pill -->
-          <div class="px-6 py-4 w-full">
-            <pill-select v-model="user.enabled" :options="userStatusOptions" />
+          <div
+            v-if="filteredUsers.length === 0"
+            class="px-6 py-12 text-center text-sm text-gray-400"
+          >
+            No se encontraron usuarios
           </div>
-        </div>
-
-        <!-- Empty state -->
-        <div v-if="filteredUsers.length === 0" class="px-6 py-12 text-center text-sm text-gray-400">
-          No se encontraron usuarios
-        </div>
-      </div>
+        </template>
+      </base-table>
     </div>
   </div>
 </template>

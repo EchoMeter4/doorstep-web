@@ -30,7 +30,10 @@ const filteredItems = computed(() => {
         :key="item.id"
         class="relative flex items-center justify-between px-10 h-16"
       >
-        <div v-if="item.enabled !== item.original" class="absolute left-0 top-0 h-full w-3 bg-orange-200" />
+        <div
+          v-if="item.enabled !== item.original"
+          class="absolute left-0 top-0 h-full w-3 bg-orange-200"
+        />
         <span class="text-sm">{{ item.name }}</span>
         <toggle-switch v-model="item.enabled" />
       </div>

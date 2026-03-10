@@ -9,6 +9,7 @@ import IconBadge from '@/components/IconBadge.vue'
 import OverflowBadgeList from '@/components/OverflowBadgeList.vue'
 import PillSelect from '@/components/PillSelect.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import BaseTable from '@/components/BaseTable.vue'
 import ZoneDetails from '@/components/zones/ZoneDetails.vue'
 
 const zones = ref([
@@ -159,94 +160,88 @@ function closeDetailsModal() {
     </base-modal>
     <!-- Main content card -->
     <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
-      <!-- Filter bar -->
-      <div class="px-6 pt-4 pb-3 flex flex-col gap-3">
-        <!-- search + filters + add button -->
-        <div class="flex items-center gap-3">
-          <search-input v-model="search" placeholder="Buscar zona..." class="flex-1" />
-          <div class="flex flex-row items-center gap-2">
-            <filter-dropdown v-model="activeTypeFilter" label="Tipo" :options="typeFilters" />
-            <filter-dropdown v-model="activeRoleFilter" label="Rol" :options="roleFilterOptions" />
-            <filter-toggle
-              v-model="activeStatusFilter"
-              label="Activo"
-              value="active"
-              :count="activeZones"
-              dot-class="bg-green-500"
-              active-class="border-green-300 bg-green-50 text-green-700"
-            />
-            <filter-toggle
-              v-model="activeStatusFilter"
-              label="Inactivo"
-              value="inactive"
-              :count="inactiveZones"
-              dot-class="bg-gray-400"
-              active-class="border-gray-400 bg-gray-100 text-gray-700"
-            />
+      <base-table
+        :columns="['zona', 'tipo', 'roles con acceso', 'estatus']"
+        grid-cols="grid-cols-[38%_15%_32%_15%]"
+      >
+        <template #filters>
+          <div class="flex items-center gap-3">
+            <search-input v-model="search" placeholder="Buscar zona..." class="flex-1" />
+            <div class="flex flex-row items-center gap-2">
+              <filter-dropdown v-model="activeTypeFilter" label="Tipo" :options="typeFilters" />
+              <filter-dropdown
+                v-model="activeRoleFilter"
+                label="Rol"
+                :options="roleFilterOptions"
+              />
+              <filter-toggle
+                v-model="activeStatusFilter"
+                label="Activo"
+                value="active"
+                :count="activeZones"
+                dot-class="bg-green-500"
+                active-class="border-green-300 bg-green-50 text-green-700"
+              />
+              <filter-toggle
+                v-model="activeStatusFilter"
+                label="Inactivo"
+                value="inactive"
+                :count="inactiveZones"
+                dot-class="bg-gray-400"
+                active-class="border-gray-400 bg-gray-100 text-gray-700"
+              />
+            </div>
+            <button
+              class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+            >
+              <plus-icon class="size-4" />
+              Agregar Zona
+            </button>
           </div>
-          <button
-            class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
-          >
-            <plus-icon class="size-4" />
-            Agregar Zona
-          </button>
-        </div>
-      </div>
+        </template>
 
-      <!-- Data grid -->
-      <div class="min-h-0 overflow-auto">
-        <!-- Header row -->
-        <div
-          class="grid grid-cols-[38%_15%_32%_15%] bg-brand-primary-700 py-5 text-xs font-semibold text-white uppercase tracking-wider"
-        >
+        <template #rows>
           <div
-            class="px-6"
-            v-for="header in ['zona', 'tipo', 'roles con acceso', 'estatus']"
-            :key="header"
+            v-for="zone in filteredZones"
+            :key="zone.id"
+            class="grid grid-cols-[38%_15%_32%_15%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+            role="button"
+            @click="openDetailsModal(zone)"
           >
-            {{ header }}
-          </div>
-        </div>
+            <!-- Zone name + description -->
+            <div class="px-6 py-4">
+              <p class="text-sm font-medium text-gray-900">{{ zone.name }}</p>
+              <p class="text-xs text-gray-400 mt-0.5">{{ zone.description }}</p>
+            </div>
 
-        <!-- Data rows -->
-        <div
-          v-for="zone in filteredZones"
-          :key="zone.id"
-          class="grid grid-cols-[38%_15%_32%_15%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
-          role="button"
-          @click="openDetailsModal(zone)"
-        >
-          <!-- Zone name + description -->
-          <div class="px-6 py-4">
-            <p class="text-sm font-medium text-gray-900">{{ zone.name }}</p>
-            <p class="text-xs text-gray-400 mt-0.5">{{ zone.description }}</p>
-          </div>
+            <!-- Type badge -->
+            <div class="px-6 py-4">
+              <icon-badge
+                :icon="typeIcons[zone.type]"
+                :label="typeLabels[zone.type]"
+                :color-class="typeClasses[zone.type]"
+              />
+            </div>
 
-          <!-- Type badge -->
-          <div class="px-6 py-4">
-            <icon-badge
-              :icon="typeIcons[zone.type]"
-              :label="typeLabels[zone.type]"
-              :color-class="typeClasses[zone.type]"
-            />
-          </div>
+            <!-- Role badges (max 2 + overflow pill) -->
+            <div class="px-6 py-4">
+              <overflow-badge-list :items="zone.roles" />
+            </div>
 
-          <!-- Role badges (max 2 + overflow pill) -->
-          <div class="px-6 py-4">
-            <overflow-badge-list :items="zone.roles" />
+            <!-- Status pill with dropdown -->
+            <div class="px-6 py-4 w-full">
+              <pill-select v-model="zone.enabled" :options="zoneStatusOptions" />
+            </div>
           </div>
 
-          <!-- Status pill with dropdown -->
-          <div class="px-6 py-4 w-full">
-            <pill-select v-model="zone.enabled" :options="zoneStatusOptions" />
+          <div
+            v-if="filteredZones.length === 0"
+            class="px-6 py-12 text-center text-sm text-gray-400"
+          >
+            No se encontraron zonas
           </div>
-        </div>
-
-        <!-- Empty state -->
-        <div v-if="filteredZones.length === 0" class="px-6 py-12 text-center text-sm text-gray-400">
-          No se encontraron zonas
-        </div>
-      </div>
+        </template>
+      </base-table>
     </div>
   </div>
 </template>

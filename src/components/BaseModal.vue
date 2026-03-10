@@ -24,10 +24,7 @@ function closeModal() {
         class="min-h-screen h-fit w-screen top-0 left-0 relative flex items-center justify-center z-50"
       >
         <div class="absolute bg-gray-900 opacity-35 size-full" />
-        <div
-          class="bg-white rounded-4xl shadow-lg w-fit z-10"
-          v-click-outside-modal="closeModal"
-        >
+        <div class="bg-white rounded-4xl shadow-lg w-fit z-10" v-click-outside-modal="closeModal">
           <slot />
         </div>
       </div>

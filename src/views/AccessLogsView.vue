@@ -14,6 +14,7 @@ import FilterToggle from '@/components/FilterToggle.vue'
 import OverflowBadgeList from '@/components/OverflowBadgeList.vue'
 import IconBadge from '@/components/IconBadge.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import BaseTable from '@/components/BaseTable.vue'
 import AccessLogDetails from '@/components/logs/AccessLogDetails.vue'
 
 // --- Zone data lookup ---
@@ -50,7 +51,14 @@ const logs = ref([
     id: 'LOG-20260308-1001',
     credentialType: 'rfid',
     credentialValue: 'A-00124',
-    users: [{ id: 1, name: 'Juan García', enabled: true, credential: { type: 'RFID', number: 'A-00124' } }],
+    users: [
+      {
+        id: 1,
+        name: 'Juan García',
+        enabled: true,
+        credential: { type: 'RFID', number: 'A-00124' },
+      },
+    ],
     zone: zoneData['Entrada Principal'],
     timestamp: '2026-03-08T08:15:00',
     authorized: true,
@@ -59,7 +67,9 @@ const logs = ref([
     id: 'LOG-20260308-1002',
     credentialType: 'qr',
     credentialValue: 'Q-00201',
-    users: [{ id: 3, name: 'Carlos Pérez', enabled: true, credential: { type: 'QR', number: 'Q-00201' } }],
+    users: [
+      { id: 3, name: 'Carlos Pérez', enabled: true, credential: { type: 'QR', number: 'Q-00201' } },
+    ],
     zone: zoneData['Sala de Servidores'],
     timestamp: '2026-03-08T09:02:33',
     authorized: false,
@@ -69,7 +79,14 @@ const logs = ref([
     credentialType: 'lpn',
     credentialValue: 'ABC-123',
     users: [
-      { id: 1, name: 'Juan García', roles: [{ id: 1, name: 'Empleado' }, { id: 2, name: 'Supervisor' }] },
+      {
+        id: 1,
+        name: 'Juan García',
+        roles: [
+          { id: 1, name: 'Empleado' },
+          { id: 2, name: 'Supervisor' },
+        ],
+      },
       { id: 2, name: 'María López', roles: [{ id: 1, name: 'Empleado' }] },
     ],
     zone: zoneData['Estacionamiento'],
@@ -80,7 +97,14 @@ const logs = ref([
     id: 'LOG-20260308-1004',
     credentialType: 'rfid',
     credentialValue: 'A-00125',
-    users: [{ id: 2, name: 'María López', enabled: true, credential: { type: 'RFID', number: 'A-00125' } }],
+    users: [
+      {
+        id: 2,
+        name: 'María López',
+        enabled: true,
+        credential: { type: 'RFID', number: 'A-00125' },
+      },
+    ],
     zone: zoneData['Entrada Principal'],
     timestamp: '2026-03-08T10:05:44',
     authorized: true,
@@ -90,7 +114,14 @@ const logs = ref([
     credentialType: 'lpn',
     credentialValue: 'DEF-456',
     users: [
-      { id: 2, name: 'María López', roles: [{ id: 1, name: 'Empleado' }, { id: 3, name: 'Visitante' }] },
+      {
+        id: 2,
+        name: 'María López',
+        roles: [
+          { id: 1, name: 'Empleado' },
+          { id: 3, name: 'Visitante' },
+        ],
+      },
     ],
     zone: zoneData['Estacionamiento'],
     timestamp: '2026-03-08T11:20:00',
@@ -100,7 +131,14 @@ const logs = ref([
     id: 'LOG-20260308-1006',
     credentialType: 'qr',
     credentialValue: 'Q-00205',
-    users: [{ id: 6, name: 'Pedro Sánchez', enabled: false, credential: { type: 'QR', number: 'Q-00205' } }],
+    users: [
+      {
+        id: 6,
+        name: 'Pedro Sánchez',
+        enabled: false,
+        credential: { type: 'QR', number: 'Q-00205' },
+      },
+    ],
     zone: zoneData['Almacén'],
     timestamp: '2026-03-08T12:45:17',
     authorized: false,
@@ -109,7 +147,9 @@ const logs = ref([
     id: 'LOG-20260307-1007',
     credentialType: 'rfid',
     credentialValue: 'A-00131',
-    users: [{ id: 4, name: 'Ana Torres', enabled: true, credential: { type: 'RFID', number: 'A-00131' } }],
+    users: [
+      { id: 4, name: 'Ana Torres', enabled: true, credential: { type: 'RFID', number: 'A-00131' } },
+    ],
     zone: zoneData['Entrada Principal'],
     timestamp: '2026-03-07T08:00:05',
     authorized: true,
@@ -119,7 +159,14 @@ const logs = ref([
     credentialType: 'lpn',
     credentialValue: 'MNO-345',
     users: [
-      { id: 5, name: 'Luis Ramírez', roles: [{ id: 2, name: 'Supervisor' }, { id: 4, name: 'Administrador' }] },
+      {
+        id: 5,
+        name: 'Luis Ramírez',
+        roles: [
+          { id: 2, name: 'Supervisor' },
+          { id: 4, name: 'Administrador' },
+        ],
+      },
       { id: 8, name: 'Elena Vásquez', roles: [{ id: 1, name: 'Empleado' }] },
     ],
     zone: zoneData['Estacionamiento'],
@@ -130,7 +177,14 @@ const logs = ref([
     id: 'LOG-20260307-1009',
     credentialType: 'rfid',
     credentialValue: 'A-00142',
-    users: [{ id: 8, name: 'Elena Vásquez', enabled: true, credential: { type: 'RFID', number: 'A-00142' } }],
+    users: [
+      {
+        id: 8,
+        name: 'Elena Vásquez',
+        enabled: true,
+        credential: { type: 'RFID', number: 'A-00142' },
+      },
+    ],
     zone: zoneData['Sala de Servidores'],
     timestamp: '2026-03-07T13:50:22',
     authorized: true,
@@ -148,7 +202,9 @@ const logs = ref([
     id: 'LOG-20260306-1011',
     credentialType: 'qr',
     credentialValue: 'Q-00201',
-    users: [{ id: 3, name: 'Carlos Pérez', enabled: true, credential: { type: 'QR', number: 'Q-00201' } }],
+    users: [
+      { id: 3, name: 'Carlos Pérez', enabled: true, credential: { type: 'QR', number: 'Q-00201' } },
+    ],
     zone: zoneData['Almacén'],
     timestamp: '2026-03-06T08:55:00',
     authorized: true,
@@ -157,7 +213,14 @@ const logs = ref([
     id: 'LOG-20260306-1012',
     credentialType: 'rfid',
     credentialValue: 'A-00124',
-    users: [{ id: 1, name: 'Juan García', enabled: true, credential: { type: 'RFID', number: 'A-00124' } }],
+    users: [
+      {
+        id: 1,
+        name: 'Juan García',
+        enabled: true,
+        credential: { type: 'RFID', number: 'A-00124' },
+      },
+    ],
     zone: zoneData['Sala de Servidores'],
     timestamp: '2026-03-06T10:10:10',
     authorized: true,
@@ -166,9 +229,7 @@ const logs = ref([
     id: 'LOG-20260306-1013',
     credentialType: 'lpn',
     credentialValue: 'PQR-678',
-    users: [
-      { id: 5, name: 'Luis Ramírez', roles: [{ id: 2, name: 'Supervisor' }] },
-    ],
+    users: [{ id: 5, name: 'Luis Ramírez', roles: [{ id: 2, name: 'Supervisor' }] }],
     zone: zoneData['Estacionamiento'],
     timestamp: '2026-03-06T14:22:45',
     authorized: false,
@@ -177,7 +238,14 @@ const logs = ref([
     id: 'LOG-20260305-1014',
     credentialType: 'rfid',
     credentialValue: 'B-00301',
-    users: [{ id: 7, name: 'Sofia Mendoza', enabled: true, credential: { type: 'RFID', number: 'B-00301' } }],
+    users: [
+      {
+        id: 7,
+        name: 'Sofia Mendoza',
+        enabled: true,
+        credential: { type: 'RFID', number: 'B-00301' },
+      },
+    ],
     zone: zoneData['Entrada Principal'],
     timestamp: '2026-03-05T07:45:00',
     authorized: true,
@@ -186,7 +254,14 @@ const logs = ref([
     id: 'LOG-20260305-1015',
     credentialType: 'qr',
     credentialValue: 'Q-00205',
-    users: [{ id: 6, name: 'Pedro Sánchez', enabled: false, credential: { type: 'QR', number: 'Q-00205' } }],
+    users: [
+      {
+        id: 6,
+        name: 'Pedro Sánchez',
+        enabled: false,
+        credential: { type: 'QR', number: 'Q-00205' },
+      },
+    ],
     zone: zoneData['Entrada Principal'],
     timestamp: '2026-03-05T11:00:00',
     authorized: false,
@@ -315,135 +390,130 @@ function closeDetailsModal() {
 
     <!-- Main content card -->
     <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
-      <!-- Filter bar -->
-      <div class="px-6 pt-4 pb-3 border-b border-gray-100 flex flex-col gap-3">
-        <!-- Row 1 -->
-        <div class="flex items-center gap-3">
-          <search-input v-model="search" placeholder="Buscar registro..." class="flex-1 max-w-78" />
-          <div class="flex flex-row items-center gap-2">
-            <filter-toggle
-              v-model="activeStatusFilter"
-              label="Autorizado"
-              value="authorized"
-              :count="authorizedCount"
-              dot-class="bg-green-500"
-              active-class="border-green-300 bg-green-50 text-green-700"
+      <base-table
+        :columns="['Credencial', 'Usuario(s)', 'Zona', 'Fecha y Hora', 'Estatus']"
+        grid-cols="grid-cols-[16%_25%_25%_17%_17%]"
+      >
+        <template #filters>
+          <!-- Row 1 -->
+          <div class="flex items-center gap-3">
+            <search-input
+              v-model="search"
+              placeholder="Buscar registro..."
+              class="flex-1 max-w-78"
             />
-            <filter-toggle
-              v-model="activeStatusFilter"
-              label="No autorizado"
-              value="unauthorized"
-              :count="unauthorizedCount"
-              dot-class="bg-red-400"
-              active-class="border-red-300 bg-red-50 text-red-700"
+            <div class="flex flex-row items-center gap-2">
+              <filter-toggle
+                v-model="activeStatusFilter"
+                label="Autorizado"
+                value="authorized"
+                :count="authorizedCount"
+                dot-class="bg-green-500"
+                active-class="border-green-300 bg-green-50 text-green-700"
+              />
+              <filter-toggle
+                v-model="activeStatusFilter"
+                label="No autorizado"
+                value="unauthorized"
+                :count="unauthorizedCount"
+                dot-class="bg-red-400"
+                active-class="border-red-300 bg-red-50 text-red-700"
+              />
+            </div>
+          </div>
+
+          <!-- Row 2: date range -->
+          <div class="flex items-center gap-3">
+            <filter-dropdown
+              v-model="activeZoneFilter"
+              label="Zona"
+              :options="zoneFilterOptions"
+              class="flex-1"
+            />
+            <filter-dropdown
+              v-model="activeCredentialTypeFilter"
+              label="Tipo de Acceso"
+              :options="credentialTypeFilterOptions"
+              class="flex-1"
+            />
+            <span class="text-sm text-gray-500 shrink-0">Desde</span>
+            <input
+              v-model="dateFrom"
+              type="date"
+              class="border border-gray-200 rounded-2xl px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-brand-secondary transition-colors"
+            />
+            <span class="text-sm text-gray-500 shrink-0">Hasta</span>
+            <input
+              v-model="dateTo"
+              type="date"
+              class="border border-gray-200 rounded-2xl px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-brand-secondary transition-colors"
             />
           </div>
-        </div>
+        </template>
 
-        <!-- Row 2: date range -->
-        <div class="flex items-center gap-3">
-          <filter-dropdown
-            v-model="activeZoneFilter"
-            label="Zona"
-            :options="zoneFilterOptions"
-            class="flex-1"
-          />
-          <filter-dropdown
-            v-model="activeCredentialTypeFilter"
-            label="Tipo de Acceso"
-            :options="credentialTypeFilterOptions"
-            class="flex-1"
-          />
-          <span class="text-sm text-gray-500 shrink-0">Desde</span>
-          <input
-            v-model="dateFrom"
-            type="date"
-            class="border border-gray-200 rounded-2xl px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-brand-secondary transition-colors"
-          />
-          <span class="text-sm text-gray-500 shrink-0">Hasta</span>
-          <input
-            v-model="dateTo"
-            type="date"
-            class="border border-gray-200 rounded-2xl px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-brand-secondary transition-colors"
-          />
-        </div>
-      </div>
-
-      <!-- Data grid -->
-      <div class="min-h-0 overflow-auto">
-        <!-- Header row -->
-        <div
-          class="grid grid-cols-[16%_25%_25%_17%_17%] bg-brand-primary-700 py-5 text-xs font-semibold text-white uppercase tracking-wider"
-        >
+        <template #rows>
           <div
-            v-for="header in ['Credencial', 'Usuario(s)', 'Zona', 'Fecha y Hora', 'Estatus']"
-            :key="header"
-            class="px-6"
+            v-for="log in filteredLogs"
+            :key="log.id"
+            class="grid grid-cols-[16%_25%_25%_17%_17%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+            role="button"
+            @click="openDetailsModal(log)"
           >
-            {{ header }}
-          </div>
-        </div>
+            <!-- Credential -->
+            <div class="px-6 py-4 flex flex-col gap-1">
+              <p class="text-sm font-semibold text-gray-900 font-mono">{{ log.credentialValue }}</p>
+              <icon-badge
+                :icon="credentialTypeBadge[log.credentialType].icon"
+                :label="credentialTypeBadge[log.credentialType].label"
+                :color-class="credentialTypeBadge[log.credentialType].colorClass"
+              />
+            </div>
 
-        <!-- Data rows -->
-        <div
-          v-for="log in filteredLogs"
-          :key="log.id"
-          class="grid grid-cols-[16%_25%_25%_17%_17%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
-          role="button"
-          @click="openDetailsModal(log)"
-        >
-          <!-- Credential -->
-          <div class="px-6 py-4 flex flex-col gap-1">
-            <p class="text-sm font-semibold text-gray-900 font-mono">{{ log.credentialValue }}</p>
-            <icon-badge
-              :icon="credentialTypeBadge[log.credentialType].icon"
-              :label="credentialTypeBadge[log.credentialType].label"
-              :color-class="credentialTypeBadge[log.credentialType].colorClass"
-            />
+            <!-- User(s) -->
+            <div class="px-6 py-4">
+              <span v-if="log.users.length === 0" class="text-sm text-gray-400">Sin usuarios</span>
+              <span v-else-if="log.credentialType !== 'lpn'" class="text-sm text-gray-700">
+                {{ log.users[0].name }}
+              </span>
+              <overflow-badge-list v-else :items="log.users.map((u) => u.name)" />
+            </div>
+
+            <!-- Zone -->
+            <div class="px-6 py-4">
+              <p class="text-sm text-gray-700">{{ log.zone.name }}</p>
+            </div>
+
+            <!-- Timestamp -->
+            <div class="px-6 py-4 flex flex-col gap-0.5">
+              <p class="text-sm text-gray-900">{{ formatDate(log.timestamp) }}</p>
+              <p class="text-xs text-gray-400">{{ formatTime(log.timestamp) }}</p>
+            </div>
+
+            <!-- Status -->
+            <div class="px-6 py-4">
+              <icon-badge
+                v-if="log.authorized"
+                :icon="CheckCircleIcon"
+                label="Autorizado"
+                color-class="bg-green-50 text-green-700 w-full"
+              />
+              <icon-badge
+                v-else
+                :icon="XMarkIcon"
+                label="No autorizado"
+                color-class="bg-red-50 text-red-600 w-full"
+              />
+            </div>
           </div>
 
-          <!-- User(s) -->
-          <div class="px-6 py-4">
-            <span v-if="log.users.length === 0" class="text-sm text-gray-400">Sin usuarios</span>
-            <span v-else-if="log.credentialType !== 'lpn'" class="text-sm text-gray-700">
-              {{ log.users[0].name }}
-            </span>
-            <overflow-badge-list v-else :items="log.users.map((u) => u.name)" />
+          <div
+            v-if="filteredLogs.length === 0"
+            class="px-6 py-12 text-center text-sm text-gray-400"
+          >
+            No se encontraron registros
           </div>
-
-          <!-- Zone -->
-          <div class="px-6 py-4">
-            <p class="text-sm text-gray-700">{{ log.zone.name }}</p>
-          </div>
-
-          <!-- Timestamp -->
-          <div class="px-6 py-4 flex flex-col gap-0.5">
-            <p class="text-sm text-gray-900">{{ formatDate(log.timestamp) }}</p>
-            <p class="text-xs text-gray-400">{{ formatTime(log.timestamp) }}</p>
-          </div>
-
-          <!-- Status -->
-          <div class="px-6 py-4">
-            <icon-badge
-              v-if="log.authorized"
-              :icon="CheckCircleIcon"
-              label="Autorizado"
-              color-class="bg-green-50 text-green-700 w-full"
-            />
-            <icon-badge
-              v-else
-              :icon="XMarkIcon"
-              label="No autorizado"
-              color-class="bg-red-50 text-red-600 w-full"
-            />
-          </div>
-        </div>
-
-        <!-- Empty state -->
-        <div v-if="filteredLogs.length === 0" class="px-6 py-12 text-center text-sm text-gray-400">
-          No se encontraron registros
-        </div>
-      </div>
+        </template>
+      </base-table>
     </div>
   </div>
 </template>
