@@ -208,7 +208,7 @@ function closeDetailsModal() {
           >
             <!-- Credential -->
             <div class="px-6 py-4 flex flex-col gap-1">
-              <p class="text-sm font-semibold text-gray-900 font-mono">{{ log.credentialValue }}</p>
+              <p class="text-sm font-medium text-gray-900">{{ log.credentialValue }}</p>
               <icon-badge
                 :icon="credentialTypeBadge[log.credentialType].icon"
                 :label="credentialTypeBadge[log.credentialType].label"

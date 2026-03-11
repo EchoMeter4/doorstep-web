@@ -12,7 +12,7 @@ const route = useRoute()
       <div class="flex flex-row min-h-full min-w-full w-fit p-2.5 space-x-2.5">
         <AppSidebar class="min-h-fit" />
         <div class="flex-1 flex flex-col space-y-2.5">
-          <AppNavbar :title="route.meta.title ?? ''" class="sticky top-0 z-100" />
+          <AppNavbar :title="route.meta.title ?? ''" class="sticky top-0 z-100 shrink-0" />
           <RouterView />
         </div>
         <div id="modal" class="z-1000 fixed left-0 top-0"></div>
@@ -20,3 +20,9 @@ const route = useRoute()
     </main>
   </div>
 </template>
+
+<style scoped>
+main {
+  scrollbar-gutter: stable;
+}
+</style>

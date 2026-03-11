@@ -38,7 +38,7 @@ const tabDefs = computed(() => [
 <template>
   <base-details-panel :tab-defs="tabDefs">
     <template #header-title>
-      <span class="font-semibold text-gray-900 font-mono">{{ log.credentialValue }}</span>
+      <span class="font-semibold text-gray-900">{{ log.credentialValue }}</span>
     </template>
   </base-details-panel>
 </template>

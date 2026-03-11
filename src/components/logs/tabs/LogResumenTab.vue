@@ -48,7 +48,7 @@ function formatTimestamp(ts) {
         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider"
           >ID de Registro</span
         >
-        <p class="text-sm text-gray-900 font-mono">{{ log.id }}</p>
+        <p class="text-sm text-gray-900">{{ log.id }}</p>
       </div>
 
       <div class="flex flex-col gap-1.5">
@@ -91,7 +91,7 @@ function formatTimestamp(ts) {
             :label="credentialTypeBadge[log.credentialType].label"
             :color-class="credentialTypeBadge[log.credentialType].colorClass"
           />
-          <span class="text-sm text-gray-900 font-mono">{{ log.credentialValue }}</span>
+          <span class="text-sm text-gray-900">{{ log.credentialValue }}</span>
         </div>
       </div>
 

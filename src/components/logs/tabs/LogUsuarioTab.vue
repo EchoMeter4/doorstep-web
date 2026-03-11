@@ -53,7 +53,7 @@ const filteredUsers = computed(() => {
             'bg-gray-100 text-gray-600'
           "
         />
-        <span class="text-sm text-gray-900 font-mono">{{ log.users[0].credential.number }}</span>
+        <span class="text-sm text-gray-900">{{ log.users[0].credential.number }}</span>
       </div>
       <icon-badge v-else label="Sin credencial" color-class="bg-gray-100 text-gray-500" />
     </div>
