@@ -193,7 +193,7 @@ function closeCreateModal() {
 
             <!-- Identifier + label -->
             <div class="px-6 py-4">
-              <p class="text-sm font-medium font-mono text-gray-900">{{ method.value }}</p>
+              <p class="text-sm font-medium text-gray-900">{{ method.value }}</p>
               <p class="text-xs text-gray-400 mt-0.5">{{ method.label }}</p>
             </div>
 

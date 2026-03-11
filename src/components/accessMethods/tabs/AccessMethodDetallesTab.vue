@@ -53,7 +53,7 @@ const selectedUser = computed(() => props.userItems?.find((u) => u.selected) ?? 
       >
       <input
         v-model="localDetails.value"
-        class="border-b border-gray-300 outline-none py-1.5 text-sm font-mono focus:border-brand-secondary transition-colors"
+        class="border-b border-gray-300 outline-none py-1.5 text-sm focus:border-brand-secondary transition-colors"
         type="text"
         placeholder="Valor del identificador"
       />
