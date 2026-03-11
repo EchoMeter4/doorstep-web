@@ -1,12 +1,16 @@
 <script setup>
 /* eslint-disable vue/no-mutating-props */
+import { computed } from 'vue'
 import IconBadge from '@/components/IconBadge.vue'
 
-defineProps({
+const props = defineProps({
   localDetails: { type: Object, required: true },
   statusOptions: { type: Array, required: true },
   typeOptions: { type: Array, required: true },
+  userItems: { type: Array, default: null },
 })
+
+const selectedUser = computed(() => props.userItems?.find((u) => u.selected) ?? null)
 </script>
 
 <template>
@@ -60,8 +64,8 @@ defineProps({
       <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider"
         >Propietario</label
       >
-      <p class="text-sm text-gray-900" :class="!localDetails.user ? 'italic text-gray-400' : ''">
-        {{ localDetails.user?.name ?? 'Sin propietario asignado' }}
+      <p class="text-sm text-gray-900" :class="!selectedUser ? 'italic text-gray-400' : ''">
+        {{ selectedUser?.name ?? 'Sin propietario asignado' }}
       </p>
     </div>
 

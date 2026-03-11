@@ -9,13 +9,16 @@ import {
   ShieldCheckIcon,
   TrashIcon,
   TruckIcon,
+  UserIcon,
 } from '@heroicons/vue/24/solid'
 import BaseDetailsPanel from '@/components/BaseDetailsPanel.vue'
 import PendingChangesBar from '@/components/PendingChangesBar.vue'
 import AccessMethodDetallesTab from '@/components/accessMethods/tabs/AccessMethodDetallesTab.vue'
+import AccessMethodUsuarioTab from '@/components/accessMethods/tabs/AccessMethodUsuarioTab.vue'
 import AccessMethodZonasTab from '@/components/accessMethods/tabs/AccessMethodZonasTab.vue'
 import AccessMethodHistorialTab from '@/components/accessMethods/tabs/AccessMethodHistorialTab.vue'
 import { useAccessMethodsStore } from '@/stores/accessMethods.js'
+import { useUsersStore } from '@/stores/users.js'
 
 const props = defineProps({
   accessMethod: { type: Object, required: true },
@@ -24,6 +27,7 @@ const props = defineProps({
 const emit = defineEmits(['delete', 'create'])
 
 const store = useAccessMethodsStore()
+const usersStore = useUsersStore()
 const isNew = computed(() => props.accessMethod.id === null)
 
 const statusOptions = [
@@ -78,7 +82,6 @@ const localDetails = reactive({
   type: props.accessMethod?.type ?? 'rfid',
   value: props.accessMethod?.value ?? '',
   status: props.accessMethod?.enabled ?? true,
-  user: props.accessMethod?.user ?? null,
 })
 
 // --- Original values for dirty-checking and discard ---
@@ -86,7 +89,19 @@ const origLabel = ref(props.accessMethod?.label ?? '')
 const origType = ref(props.accessMethod?.type ?? 'rfid')
 const origValue = ref(props.accessMethod?.value ?? '')
 const origStatus = ref(props.accessMethod?.enabled ?? true)
-const origUser = ref(props.accessMethod?.user ?? null)
+
+// --- User tab state ---
+function buildUserItems(selectedUserId) {
+  return usersStore.users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    selected: u.id === selectedUserId,
+    original: u.id === selectedUserId,
+  }))
+}
+
+const userItems = ref(buildUserItems(props.accessMethod?.user?.id ?? null))
+const selectedUser = computed(() => userItems.value.find((u) => u.selected) ?? null)
 
 // --- Zone tab state ---
 const zoneItems = ref([...(props.accessMethod?.zones ?? [])])
@@ -99,16 +114,15 @@ watch(
     origType.value = method?.type ?? 'rfid'
     origValue.value = method?.value ?? ''
     origStatus.value = method?.enabled ?? true
-    origUser.value = method?.user ?? null
 
     Object.assign(localDetails, {
       label: method?.label ?? '',
       type: method?.type ?? 'rfid',
       value: method?.value ?? '',
       status: method?.enabled ?? true,
-      user: method?.user ?? null,
     })
 
+    userItems.value = buildUserItems(method?.user?.id ?? null)
     zoneItems.value = [...(method?.zones ?? [])]
   },
 )
@@ -120,18 +134,29 @@ const hasPendingChanges = computed(
     localDetails.type !== origType.value ||
     localDetails.value !== origValue.value ||
     localDetails.status !== origStatus.value ||
-    localDetails.user?.id !== origUser.value?.id ||
+    userItems.value.some((u) => u.selected !== u.original) ||
     zoneItems.value.some((z) => z.enabled !== z.original),
 )
 
+// --- Validation ---
+const saveValidationError = ref(null)
+
 function saveChanges() {
+  if (localDetails.type !== 'lpn' && !selectedUser.value) {
+    saveValidationError.value = 'Debes asignar un propietario para este tipo de método'
+    return
+  }
+  saveValidationError.value = null
+  const user = selectedUser.value
+    ? { id: selectedUser.value.id, name: selectedUser.value.name }
+    : null
   if (isNew.value) {
     store.addAccessMethod({
       label: localDetails.label,
       type: localDetails.type,
       value: localDetails.value,
       enabled: localDetails.status,
-      user: localDetails.user,
+      user,
       zones: zoneItems.value,
       issuedAt: new Date().toISOString(),
       lastUsed: null,
@@ -143,11 +168,12 @@ function saveChanges() {
   origType.value = localDetails.type
   origValue.value = localDetails.value
   origStatus.value = localDetails.status
-  origUser.value = localDetails.user
+  userItems.value.forEach((u) => (u.original = u.selected))
   zoneItems.value.forEach((z) => (z.original = z.enabled))
 }
 
 function discardChanges() {
+  saveValidationError.value = null
   if (isNew.value) {
     emit('create')
     return
@@ -157,8 +183,8 @@ function discardChanges() {
     type: origType.value,
     value: origValue.value,
     status: origStatus.value,
-    user: origUser.value,
   })
+  userItems.value.forEach((u) => (u.selected = u.original))
   zoneItems.value.forEach((z) => (z.enabled = z.original))
 }
 
@@ -176,7 +202,14 @@ const tabDefs = computed(() => [
     label: 'Detalles',
     icon: InformationCircleIcon,
     component: AccessMethodDetallesTab,
-    props: { localDetails, statusOptions, typeOptions },
+    props: { localDetails, statusOptions, typeOptions, userItems: userItems.value },
+  },
+  {
+    key: 'usuario',
+    label: 'Usuario',
+    icon: UserIcon,
+    component: AccessMethodUsuarioTab,
+    props: { items: userItems.value },
   },
   {
     key: 'zonas',
@@ -237,6 +270,21 @@ const tabDefs = computed(() => [
           </button>
         </div>
       </div>
+
+      <transition name="fade">
+        <div
+          v-if="saveValidationError"
+          class="absolute bottom-16 left-0 right-0 mx-6 mb-2 px-4 py-2.5 bg-red-50 border border-red-200 rounded-2xl flex items-center justify-between gap-3 z-10"
+        >
+          <p class="text-xs text-red-600">{{ saveValidationError }}</p>
+          <button
+            class="text-red-400 hover:text-red-600 text-xs shrink-0"
+            @click="saveValidationError = null"
+          >
+            ✕
+          </button>
+        </div>
+      </transition>
 
       <pending-changes-bar
         :visible="isNew || hasPendingChanges"

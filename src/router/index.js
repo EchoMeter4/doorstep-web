@@ -7,6 +7,7 @@ import ZoneManagementView from '@/views/ZoneManagementView.vue'
 import UserManagementView from '@/views/UserManagementView.vue'
 import AccessLogsView from '@/views/AccessLogsView.vue'
 import AccessMethodsView from '@/views/AccessMethodsView.vue'
+import VisitorsView from '@/views/VisitorsView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 
 const router = createRouter({
@@ -34,25 +35,31 @@ const router = createRouter({
           path: 'zones',
           name: 'zones',
           component: ZoneManagementView,
-          meta: { title: 'Gestión de Zonas Restringidas' },
+          meta: { title: 'Gestionar Zonas Restringidas' },
         },
         {
           path: 'users',
           name: 'users',
           component: UserManagementView,
-          meta: { title: 'Gestión de Usuarios' },
+          meta: { title: 'Gestionar Usuarios' },
+        },
+        {
+          path: 'access-methods',
+          name: 'access-methods',
+          component: AccessMethodsView,
+          meta: { title: 'Gestionar Métodos de Acceso' },
+        },
+        {
+          path: 'visitors',
+          name: 'visitors',
+          component: VisitorsView,
+          meta: { title: 'Gestionar Visitantes' },
         },
         {
           path: 'logs',
           name: 'logs',
           component: AccessLogsView,
           meta: { title: 'Registros de Acceso' },
-        },
-        {
-          path: 'access-methods',
-          name: 'access-methods',
-          component: AccessMethodsView,
-          meta: { title: 'Métodos de Acceso' },
         },
       ],
     },

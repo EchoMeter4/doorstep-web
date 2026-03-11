@@ -6,6 +6,7 @@ import {
   ClipboardDocumentListIcon,
   FingerPrintIcon,
   MapPinIcon,
+  TicketIcon,
   UserGroupIcon,
   UsersIcon,
 } from '@heroicons/vue/24/solid'
@@ -15,6 +16,11 @@ const sections = [
     name: 'Dashboard',
     icon: ChartPieIcon,
     routeName: 'dashboard',
+  },
+  {
+    name: 'Registros de Acceso',
+    icon: ClipboardDocumentListIcon,
+    routeName: 'logs',
   },
   {
     name: 'Usuarios',
@@ -32,14 +38,14 @@ const sections = [
     routeName: 'zones',
   },
   {
-    name: 'Registros de Acceso',
-    icon: ClipboardDocumentListIcon,
-    routeName: 'logs',
-  },
-  {
     name: 'Métodos de Acceso',
     icon: FingerPrintIcon,
     routeName: 'access-methods',
+  },
+  {
+    name: 'Visitantes',
+    icon: TicketIcon,
+    routeName: 'visitors',
   },
 ]
 </script>
