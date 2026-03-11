@@ -4,6 +4,7 @@ import SidebarButton from '@/components/SidebarButton.vue'
 import {
   ChartPieIcon,
   ClipboardDocumentListIcon,
+  FingerPrintIcon,
   MapPinIcon,
   UserGroupIcon,
   UsersIcon,
@@ -34,6 +35,11 @@ const sections = [
     name: 'Registros de Acceso',
     icon: ClipboardDocumentListIcon,
     routeName: 'logs',
+  },
+  {
+    name: 'Métodos de Acceso',
+    icon: FingerPrintIcon,
+    routeName: 'access-methods',
   },
 ]
 </script>

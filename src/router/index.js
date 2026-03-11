@@ -6,6 +6,7 @@ import RoleManagementView from '@/views/RoleManagementView.vue'
 import ZoneManagementView from '@/views/ZoneManagementView.vue'
 import UserManagementView from '@/views/UserManagementView.vue'
 import AccessLogsView from '@/views/AccessLogsView.vue'
+import AccessMethodsView from '@/views/AccessMethodsView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 
 const router = createRouter({
@@ -46,6 +47,12 @@ const router = createRouter({
           name: 'logs',
           component: AccessLogsView,
           meta: { title: 'Registros de Acceso' },
+        },
+        {
+          path: 'access-methods',
+          name: 'access-methods',
+          component: AccessMethodsView,
+          meta: { title: 'Métodos de Acceso' },
         },
       ],
     },
