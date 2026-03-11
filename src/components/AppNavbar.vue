@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth.js'
-import { BellIcon, ChevronDownIcon } from '@heroicons/vue/24/solid'
+import { ChevronDownIcon } from '@heroicons/vue/24/solid'
 import ClickOutsideModal from '@/directives/click-outside-modal.js'
 
 const props = defineProps({

@@ -37,9 +37,7 @@ const fuse = new Fuse(visitorsStore.visitors, { keys: ['name', 'company'], thres
 const filteredVisitors = computed(() => {
   const cleanSearch = search.value.trim()
   let results =
-    cleanSearch.length > 0
-      ? fuse.search(cleanSearch).map((r) => r.item)
-      : visitorsStore.visitors
+    cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : visitorsStore.visitors
 
   if (activeStatusFilter.value !== null) {
     results = results.filter((v) => v.enabled === (activeStatusFilter.value === 'active'))

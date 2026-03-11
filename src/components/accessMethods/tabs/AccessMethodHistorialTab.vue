@@ -29,11 +29,7 @@ function formatTimestamp(ts) {
     </div>
 
     <div v-else class="divide-y divide-gray-100">
-      <div
-        v-for="log in relatedLogs"
-        :key="log.id"
-        class="flex items-center justify-between py-3"
-      >
+      <div v-for="log in relatedLogs" :key="log.id" class="flex items-center justify-between py-3">
         <div class="flex flex-col gap-0.5">
           <p class="text-sm font-medium text-gray-800">{{ log.zone.name }}</p>
           <p class="text-xs text-gray-400">{{ formatTimestamp(log.timestamp) }}</p>

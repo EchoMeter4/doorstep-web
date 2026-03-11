@@ -1,5 +1,4 @@
 <script setup>
- 
 import { computed, ref } from 'vue'
 import Fuse from 'fuse.js'
 import { CheckIcon } from '@heroicons/vue/24/solid'

@@ -290,9 +290,7 @@ const tabDefs = computed(() => [
         :visible="isNew || hasPendingChanges"
         :save-label="isNew ? 'Crear' : 'Guardar'"
         :discard-label="isNew ? 'Cancelar' : 'Descartar'"
-        :message="
-          isNew ? 'Completa los detalles del nuevo método' : 'Tienes cambios pendientes'
-        "
+        :message="isNew ? 'Completa los detalles del nuevo método' : 'Tienes cambios pendientes'"
         @save="saveChanges"
         @discard="discardChanges"
       />

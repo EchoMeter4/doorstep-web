@@ -72,9 +72,7 @@ const userFilterOptions = computed(() => [
 const filteredMethods = computed(() => {
   const cleanSearch = search.value.trim()
   let results =
-    cleanSearch.length > 0
-      ? fuse.value.search(cleanSearch).map((r) => r.item)
-      : store.accessMethods
+    cleanSearch.length > 0 ? fuse.value.search(cleanSearch).map((r) => r.item) : store.accessMethods
 
   if (activeStatusFilter.value !== null) {
     results = results.filter((m) => m.enabled === (activeStatusFilter.value === 'active'))
@@ -136,11 +134,7 @@ function closeCreateModal() {
         <template #filters>
           <div class="flex items-center gap-3">
             <search-input v-model="search" placeholder="Buscar método..." class="flex-1" />
-            <filter-dropdown
-              v-model="activeTypeFilter"
-              label="Tipo"
-              :options="typeFilterOptions"
-            />
+            <filter-dropdown v-model="activeTypeFilter" label="Tipo" :options="typeFilterOptions" />
             <filter-dropdown
               v-model="activeUserFilter"
               label="Usuario"

@@ -20,9 +20,7 @@ watch(
 <template>
   <div class="flex flex-row w-[70vw] h-[70vh] max-h-150 max-w-212.5 overflow-hidden rounded-3xl">
     <!-- Sidebar -->
-    <div
-      class="flex flex-col rounded-l-4xl px-4 pt-16.25 pb-6 gap-1.5 w-44 shrink-0 bg-gray-50"
-    >
+    <div class="flex flex-col rounded-l-4xl px-4 pt-16.25 pb-6 gap-1.5 w-44 shrink-0 bg-gray-50">
       <button
         v-for="tab in tabDefs"
         :key="tab.key"

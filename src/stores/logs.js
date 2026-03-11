@@ -263,7 +263,8 @@ export const useLogsStore = defineStore('logs', () => {
       zone: zoneData['Entrada Principal'],
       timestamp: '2026-03-05T11:00:00',
       authorized: false,
-    },    {
+    },
+    {
       id: 'LOG-20260305-9000',
       credentialType: 'qr',
       credentialValue: 'Q-00205',
@@ -278,7 +279,8 @@ export const useLogsStore = defineStore('logs', () => {
       zone: zoneData['Entrada Principal'],
       timestamp: '2026-03-05T11:00:00',
       authorized: false,
-    },    {
+    },
+    {
       id: 'LOG-20260305-9001',
       credentialType: 'qr',
       credentialValue: 'Q-00205',
@@ -293,7 +295,8 @@ export const useLogsStore = defineStore('logs', () => {
       zone: zoneData['Entrada Principal'],
       timestamp: '2026-03-05T11:00:00',
       authorized: false,
-    },    {
+    },
+    {
       id: 'LOG-20260305-9002',
       credentialType: 'qr',
       credentialValue: 'Q-00205',
@@ -308,7 +311,8 @@ export const useLogsStore = defineStore('logs', () => {
       zone: zoneData['Entrada Principal'],
       timestamp: '2026-03-05T11:00:00',
       authorized: false,
-    },    {
+    },
+    {
       id: 'LOG-20260305-9003',
       credentialType: 'qr',
       credentialValue: 'Q-00205',
