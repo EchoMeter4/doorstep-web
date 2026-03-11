@@ -11,57 +11,9 @@ import PillSelect from '@/components/PillSelect.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import ZoneDetails from '@/components/zones/ZoneDetails.vue'
+import { useZonesStore } from '@/stores/zones'
 
-const zones = ref([
-  {
-    id: 1,
-    name: 'Edificio A',
-    description: 'Área administrativa principal',
-    type: 'pedestrian',
-    roles: ['Administrador', 'Directivo'],
-    enabled: true,
-  },
-  {
-    id: 2,
-    name: 'Edificio B',
-    description: 'Departamento de operaciones',
-    type: 'mixed',
-    roles: ['Administrador', 'Empleado', 'Auxiliar'],
-    enabled: true,
-  },
-  {
-    id: 3,
-    name: 'Edificio C',
-    description: 'Centro de desarrollo tecnológico',
-    type: 'pedestrian',
-    roles: ['Administrador', 'Empleado'],
-    enabled: true,
-  },
-  {
-    id: 4,
-    name: 'Edificio D',
-    description: 'Área de recursos humanos',
-    type: 'pedestrian',
-    roles: ['Administrador'],
-    enabled: false,
-  },
-  {
-    id: 5,
-    name: 'Estacionamiento Norte',
-    description: 'Zona de estacionamiento vehicular norte',
-    type: 'vehicular',
-    roles: ['Administrador', 'Directivo', 'Empleado'],
-    enabled: true,
-  },
-  {
-    id: 6,
-    name: 'Estacionamiento Sur',
-    description: 'Zona de estacionamiento vehicular sur',
-    type: 'vehicular',
-    roles: ['Visitante', 'Empleado'],
-    enabled: true,
-  },
-])
+const zonesStore = useZonesStore()
 
 const typeLabels = {
   pedestrian: 'Peatonal',
@@ -110,11 +62,11 @@ const typeFilters = [
   { key: 'mixed', label: 'Mixta' },
 ]
 
-const fuse = new Fuse(zones.value, { keys: ['name', 'description'], threshold: 0.4 })
+const fuse = new Fuse(zonesStore.zones, { keys: ['name', 'description'], threshold: 0.4 })
 
 const allRoles = computed(() => {
   const roles = new Set()
-  zones.value.forEach((z) => z.roles.forEach((r) => roles.add(r)))
+  zonesStore.zones.forEach((z) => z.roles.forEach((r) => roles.add(r)))
   return Array.from(roles).sort()
 })
 
@@ -125,7 +77,8 @@ const roleFilterOptions = computed(() => [
 
 const filteredZones = computed(() => {
   const cleanSearch = search.value.trim()
-  let results = cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : zones.value
+  let results =
+    cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : zonesStore.zones
 
   if (activeTypeFilter.value !== 'all') {
     results = results.filter((z) => z.type === activeTypeFilter.value)
@@ -139,9 +92,6 @@ const filteredZones = computed(() => {
 
   return results
 })
-
-const activeZones = computed(() => zones.value.filter((z) => z.enabled).length)
-const inactiveZones = computed(() => zones.value.filter((z) => !z.enabled).length)
 
 const selectedZone = ref(null)
 function openDetailsModal(zone) {
@@ -178,7 +128,7 @@ function closeDetailsModal() {
                 v-model="activeStatusFilter"
                 label="Activo"
                 value="active"
-                :count="activeZones"
+                :count="zonesStore.activeCount"
                 dot-class="bg-green-500"
                 active-class="border-green-300 bg-green-50 text-green-700"
               />
@@ -186,7 +136,7 @@ function closeDetailsModal() {
                 v-model="activeStatusFilter"
                 label="Inactivo"
                 value="inactive"
-                :count="inactiveZones"
+                :count="zonesStore.inactiveCount"
                 dot-class="bg-gray-400"
                 active-class="border-gray-400 bg-gray-100 text-gray-700"
               />

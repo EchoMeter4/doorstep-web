@@ -10,112 +10,9 @@ import PillSelect from '@/components/PillSelect.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import UserDetails from '@/components/users/UserDetails.vue'
+import { useUsersStore } from '@/stores/users'
 
-// Shared plate pool
-const allPlatesPool = [
-  { id: 1, name: 'ABC-123' },
-  { id: 2, name: 'DEF-456' },
-  { id: 3, name: 'GHI-789' },
-  { id: 4, name: 'JKL-012' },
-  { id: 5, name: 'MNO-345' },
-  { id: 6, name: 'PQR-678' },
-  { id: 7, name: 'STU-901' },
-]
-
-function buildPlates(assignedIds) {
-  return allPlatesPool.map((p) => ({
-    ...p,
-    enabled: assignedIds.includes(p.id),
-    original: assignedIds.includes(p.id),
-  }))
-}
-
-// All 7 roles from the shared pool
-const allRolePool = [
-  { id: 1, name: 'Administrador' },
-  { id: 2, name: 'Empleado' },
-  { id: 3, name: 'Visitante' },
-  { id: 4, name: 'Directivo' },
-  { id: 5, name: 'Auxiliar' },
-  { id: 6, name: 'Seguridad' },
-  { id: 7, name: 'Contratista' },
-]
-
-// Build a roles array for a user given their assigned role IDs
-function buildRoles(assignedIds) {
-  return allRolePool.map((role) => ({
-    ...role,
-    enabled: assignedIds.includes(role.id),
-    original: assignedIds.includes(role.id),
-  }))
-}
-
-const users = ref([
-  {
-    id: 1,
-    name: 'Juan García',
-    enabled: true,
-    credential: { id: 1, number: 'A-00124', type: 'RFID' },
-    plates: buildPlates([1, 2]),
-    roles: buildRoles([1, 4]),
-  },
-  {
-    id: 2,
-    name: 'María López',
-    enabled: true,
-    credential: { id: 2, number: 'A-00125', type: 'RFID' },
-    plates: buildPlates([3]),
-    roles: buildRoles([1, 4]),
-  },
-  {
-    id: 3,
-    name: 'Carlos Pérez',
-    enabled: true,
-    credential: { id: 3, number: 'Q-00201', type: 'QR' },
-    plates: buildPlates([]),
-    roles: buildRoles([2]),
-  },
-  {
-    id: 4,
-    name: 'Ana Torres',
-    enabled: true,
-    credential: { id: 4, number: 'A-00131', type: 'RFID' },
-    plates: buildPlates([4]),
-    roles: buildRoles([2]),
-  },
-  {
-    id: 5,
-    name: 'Luis Ramírez',
-    enabled: true,
-    credential: null,
-    plates: buildPlates([5, 6]),
-    roles: buildRoles([2, 5]),
-  },
-  {
-    id: 6,
-    name: 'Pedro Sánchez',
-    enabled: false,
-    credential: { id: 5, number: 'Q-00205', type: 'QR' },
-    plates: buildPlates([]),
-    roles: buildRoles([3]),
-  },
-  {
-    id: 7,
-    name: 'Sofia Mendoza',
-    enabled: true,
-    credential: { id: 6, number: 'B-00301', type: 'Biométrico' },
-    plates: buildPlates([7]),
-    roles: buildRoles([1]),
-  },
-  {
-    id: 8,
-    name: 'Elena Vásquez',
-    enabled: true,
-    credential: { id: 7, number: 'A-00142', type: 'RFID' },
-    plates: buildPlates([]),
-    roles: buildRoles([2, 5, 6]),
-  },
-])
+const usersStore = useUsersStore()
 
 const userStatusOptions = [
   {
@@ -138,11 +35,11 @@ const search = ref('')
 const activeStatusFilter = ref(null) // null = all | 'active' | 'inactive'
 const activeRoleFilter = ref('all')
 
-const fuse = new Fuse(users.value, { keys: ['name'], threshold: 0.4 })
+const fuse = new Fuse(usersStore.users, { keys: ['name'], threshold: 0.4 })
 
 const allRoleNames = computed(() => {
   const names = new Set()
-  users.value.forEach((u) =>
+  usersStore.users.forEach((u) =>
     u.roles.forEach((r) => {
       if (r.enabled) names.add(r.name)
     }),
@@ -157,7 +54,8 @@ const roleFilterOptions = computed(() => [
 
 const filteredUsers = computed(() => {
   const cleanSearch = search.value.trim()
-  let results = cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : users.value
+  let results =
+    cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : usersStore.users
 
   if (activeStatusFilter.value !== null) {
     results = results.filter((u) => u.enabled === (activeStatusFilter.value === 'active'))
@@ -172,9 +70,6 @@ const filteredUsers = computed(() => {
   return results
 })
 
-const activeUsers = computed(() => users.value.filter((u) => u.enabled).length)
-const inactiveUsers = computed(() => users.value.filter((u) => !u.enabled).length)
-
 const selectedUser = ref(null)
 
 function openDetailsModal(user) {
@@ -186,8 +81,8 @@ function closeDetailsModal() {
 }
 
 function handleDelete(user) {
-  const index = users.value.findIndex((u) => u.id === user.id)
-  if (index !== -1) users.value.splice(index, 1)
+  const index = usersStore.users.findIndex((u) => u.id === user.id)
+  if (index !== -1) usersStore.users.splice(index, 1)
   closeDetailsModal()
 }
 </script>
@@ -213,7 +108,7 @@ function handleDelete(user) {
                 v-model="activeStatusFilter"
                 label="Activo"
                 value="active"
-                :count="activeUsers"
+                :count="usersStore.activeCount"
                 dot-class="bg-green-500"
                 active-class="border-green-300 bg-green-50 text-green-700"
               />
@@ -221,7 +116,7 @@ function handleDelete(user) {
                 v-model="activeStatusFilter"
                 label="Inactivo"
                 value="inactive"
-                :count="inactiveUsers"
+                :count="usersStore.inactiveCount"
                 dot-class="bg-gray-400"
                 active-class="border-gray-400 bg-gray-100 text-gray-700"
               />
