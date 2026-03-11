@@ -18,16 +18,16 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-row w-[70vw] h-[70vh] bg-brand-primary-800 overflow-hidden rounded-3xl">
+  <div class="flex flex-row w-[70vw] h-[70vh] max-h-150 max-w-212.5 overflow-hidden rounded-3xl">
     <!-- Sidebar -->
     <div
-      class="flex flex-col rounded-l-4xl px-4 pt-16.25 pb-6 gap-1.5 w-44 shrink-0"
+      class="flex flex-col rounded-l-4xl px-4 pt-16.25 pb-6 gap-1.5 w-44 shrink-0 bg-gray-50"
     >
       <button
         v-for="tab in tabDefs"
         :key="tab.key"
-        class="w-full text-left rounded-2xl py-3 px-4 transition-colors duration-200 flex items-center gap-3 text-white"
-        :class="activeTab === tab.key ? 'bg-brand-secondary' : 'hover:bg-gray-300'"
+        class="w-full text-left rounded-2xl py-3 px-4 transition-colors duration-200 flex items-center gap-3"
+        :class="activeTab === tab.key ? 'bg-brand-secondary text-white' : 'hover:bg-gray-300'"
         @click="activeTab = tab.key"
       >
         <component :is="tab.icon" class="size-5 shrink-0" />
