@@ -85,12 +85,24 @@ function handleDelete(user) {
   if (index !== -1) usersStore.users.splice(index, 1)
   closeDetailsModal()
 }
+
+const isCreating = ref(false)
+function openCreateModal() {
+  isCreating.value = true
+}
+function closeCreateModal() {
+  isCreating.value = false
+}
 </script>
 
 <template>
   <div class="flex flex-col gap-6 size-full">
     <base-modal :is-open="selectedUser !== null" @close="closeDetailsModal">
       <user-details :user="selectedUser" @delete="handleDelete" />
+    </base-modal>
+
+    <base-modal :is-open="isCreating" @close="closeCreateModal">
+      <user-details :user="usersStore.createEmpty()" @create="closeCreateModal" />
     </base-modal>
 
     <!-- Main content card -->
@@ -123,6 +135,7 @@ function handleDelete(user) {
             </div>
             <button
               class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+              @click="openCreateModal"
             >
               <plus-icon class="size-4" />
               Agregar Usuario

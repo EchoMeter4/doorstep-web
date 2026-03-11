@@ -14,12 +14,16 @@ import PendingChangesBar from '@/components/PendingChangesBar.vue'
 import ZoneDetallesTab from '@/components/zones/tabs/ZoneDetallesTab.vue'
 import ZoneRolesTab from '@/components/zones/tabs/ZoneRolesTab.vue'
 import ZoneInvitadosTab from '@/components/zones/tabs/ZoneInvitadosTab.vue'
+import { useZonesStore } from '@/stores/zones'
 
 const props = defineProps({
   zone: { type: Object, required: true },
 })
 
-const emit = defineEmits(['delete'])
+const emit = defineEmits(['delete', 'create'])
+
+const zonesStore = useZonesStore()
+const isNew = computed(() => props.zone.id === null)
 
 const typeLabels = { pedestrian: 'Peatonal', vehicular: 'Vehicular', mixed: 'Mixta' }
 const typeClasses = {
@@ -117,6 +121,17 @@ const hasPendingChanges = computed(
 )
 
 function saveChanges() {
+  if (isNew.value) {
+    zonesStore.addZone({
+      name: localDetails.name,
+      description: localDetails.description,
+      type: localDetails.type,
+      enabled: localDetails.status,
+      roles: roleItems.value.filter((r) => r.enabled).map((r) => r.name),
+    })
+    emit('create')
+    return
+  }
   origName.value = localDetails.name
   origDescription.value = localDetails.description
   origType.value = localDetails.type
@@ -125,6 +140,10 @@ function saveChanges() {
 }
 
 function discardChanges() {
+  if (isNew.value) {
+    emit('create')
+    return
+  }
   Object.assign(localDetails, {
     name: origName.value,
     description: origDescription.value,
@@ -170,11 +189,12 @@ const tabDefs = computed(() => [
 <template>
   <base-details-panel :tab-defs="tabDefs">
     <template #header-title>
-      <span class="font-semibold">{{ zone.name }}</span>
+      <span class="font-semibold">{{ isNew ? 'Nueva Zona' : zone.name }}</span>
     </template>
 
     <template #header-actions>
       <button
+        v-if="!isNew"
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors text-sm"
         @click="showDeleteConfirm = true"
       >
@@ -208,7 +228,10 @@ const tabDefs = computed(() => [
       </div>
 
       <pending-changes-bar
-        :visible="hasPendingChanges"
+        :visible="isNew || hasPendingChanges"
+        :save-label="isNew ? 'Crear' : 'Guardar'"
+        :discard-label="isNew ? 'Cancelar' : 'Descartar'"
+        :message="isNew ? 'Completa los detalles de la nueva zona' : 'Tienes cambios pendientes'"
         @save="saveChanges"
         @discard="discardChanges"
       />

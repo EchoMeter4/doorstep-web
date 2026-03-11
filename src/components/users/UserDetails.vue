@@ -11,12 +11,16 @@ import PendingChangesBar from '@/components/PendingChangesBar.vue'
 import UserDetallesTab from '@/components/users/tabs/UserDetallesTab.vue'
 import UserRolesTab from '@/components/users/tabs/UserRolesTab.vue'
 import UserPlacasTab from '@/components/users/tabs/UserPlacasTab.vue'
+import { useUsersStore } from '@/stores/users'
 
 const props = defineProps({
   user: { type: Object, required: true },
 })
 
-const emit = defineEmits(['delete'])
+const emit = defineEmits(['delete', 'create'])
+
+const usersStore = useUsersStore()
+const isNew = computed(() => props.user.id === null)
 
 const statusOptions = [
   {
@@ -86,6 +90,23 @@ const hasPendingChanges = computed(
 )
 
 function saveChanges() {
+  if (isNew.value) {
+    usersStore.addUser({
+      name: localDetails.name,
+      enabled: localDetails.status,
+      credential: localDetails.credentialType
+        ? {
+            id: Date.now(),
+            number: localDetails.credentialNumber,
+            type: localDetails.credentialType,
+          }
+        : null,
+      roles: roleItems.value,
+      plates: plateItems.value,
+    })
+    emit('create')
+    return
+  }
   origName.value = localDetails.name
   origStatus.value = localDetails.status
   origCredentialType.value = localDetails.credentialType
@@ -98,6 +119,10 @@ function saveChanges() {
 }
 
 function discardChanges() {
+  if (isNew.value) {
+    emit('create')
+    return
+  }
   Object.assign(localDetails, {
     name: origName.value,
     status: origStatus.value,
@@ -145,11 +170,12 @@ const tabDefs = computed(() => [
 <template>
   <base-details-panel :tab-defs="tabDefs">
     <template #header-title>
-      <span class="font-semibold">{{ user.name }}</span>
+      <span class="font-semibold">{{ isNew ? 'Nuevo Usuario' : user.name }}</span>
     </template>
 
     <template #header-actions>
       <button
+        v-if="!isNew"
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors text-sm"
         @click="showDeleteConfirm = true"
       >
@@ -183,7 +209,10 @@ const tabDefs = computed(() => [
       </div>
 
       <pending-changes-bar
-        :visible="hasPendingChanges"
+        :visible="isNew || hasPendingChanges"
+        :save-label="isNew ? 'Crear' : 'Guardar'"
+        :discard-label="isNew ? 'Cancelar' : 'Descartar'"
+        :message="isNew ? 'Completa los detalles del nuevo usuario' : 'Tienes cambios pendientes'"
         @save="saveChanges"
         @discard="discardChanges"
       />

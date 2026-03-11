@@ -11,12 +11,16 @@ import PendingChangesBar from '@/components/PendingChangesBar.vue'
 import RoleDetallesTab from '@/components/roles/tabs/RoleDetallesTab.vue'
 import RoleUsuariosTab from '@/components/roles/tabs/RoleUsuariosTab.vue'
 import RoleZonasTab from '@/components/roles/tabs/RoleZonasTab.vue'
+import { useRolesStore } from '@/stores/roles'
 
 const props = defineProps({
   role: { type: Object, required: true },
 })
 
-const emit = defineEmits(['delete'])
+const emit = defineEmits(['delete', 'create'])
+
+const rolesStore = useRolesStore()
+const isNew = computed(() => props.role.id === null)
 
 const statusOptions = [
   {
@@ -79,6 +83,17 @@ const hasPendingChanges = computed(
 )
 
 function saveChanges() {
+  if (isNew.value) {
+    rolesStore.addRole({
+      name: localDetails.name,
+      description: localDetails.description,
+      enabled: localDetails.status,
+      users: userItems.value,
+      restrictedZones: zoneItems.value,
+    })
+    emit('create')
+    return
+  }
   origName.value = localDetails.name
   origDescription.value = localDetails.description
   origStatus.value = localDetails.status
@@ -87,6 +102,10 @@ function saveChanges() {
 }
 
 function discardChanges() {
+  if (isNew.value) {
+    emit('create')
+    return
+  }
   Object.assign(localDetails, {
     name: origName.value,
     description: origDescription.value,
@@ -132,11 +151,12 @@ const tabDefs = computed(() => [
 <template>
   <base-details-panel :tab-defs="tabDefs">
     <template #header-title>
-      <span class="font-semibold">{{ role.name }}</span>
+      <span class="font-semibold">{{ isNew ? 'Nuevo Rol' : role.name }}</span>
     </template>
 
     <template #header-actions>
       <button
+        v-if="!isNew"
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors text-sm"
         @click="showDeleteConfirm = true"
       >
@@ -170,7 +190,10 @@ const tabDefs = computed(() => [
       </div>
 
       <pending-changes-bar
-        :visible="hasPendingChanges"
+        :visible="isNew || hasPendingChanges"
+        :save-label="isNew ? 'Crear' : 'Guardar'"
+        :discard-label="isNew ? 'Cancelar' : 'Descartar'"
+        :message="isNew ? 'Completa los detalles del nuevo rol' : 'Tienes cambios pendientes'"
         @save="saveChanges"
         @discard="discardChanges"
       />

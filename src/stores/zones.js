@@ -56,5 +56,14 @@ export const useZonesStore = defineStore('zones', () => {
   const activeCount = computed(() => zones.value.filter((z) => z.enabled).length)
   const inactiveCount = computed(() => zones.value.filter((z) => !z.enabled).length)
 
-  return { zones, activeCount, inactiveCount }
+  function createEmpty() {
+    return { id: null, name: '', description: '', type: 'pedestrian', enabled: true, roles: [] }
+  }
+
+  function addZone(data) {
+    const id = Math.max(0, ...zones.value.map((z) => z.id)) + 1
+    zones.value.push({ id, ...data })
+  }
+
+  return { zones, activeCount, inactiveCount, createEmpty, addZone }
 })

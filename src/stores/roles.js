@@ -123,5 +123,14 @@ export const useRolesStore = defineStore('roles', () => {
   const activeCount = computed(() => roles.value.filter((r) => r.enabled).length)
   const inactiveCount = computed(() => roles.value.filter((r) => !r.enabled).length)
 
-  return { roles, activeCount, inactiveCount }
+  function createEmpty() {
+    return { id: null, name: '', description: '', enabled: true, users: [], restrictedZones: [] }
+  }
+
+  function addRole(data) {
+    const id = Math.max(0, ...roles.value.map((r) => r.id)) + 1
+    roles.value.push({ id, ...data })
+  }
+
+  return { roles, activeCount, inactiveCount, createEmpty, addRole }
 })

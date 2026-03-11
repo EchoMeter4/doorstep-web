@@ -101,12 +101,24 @@ function openDetailsModal(zone) {
 function closeDetailsModal() {
   selectedZone.value = null
 }
+
+const isCreating = ref(false)
+function openCreateModal() {
+  isCreating.value = true
+}
+function closeCreateModal() {
+  isCreating.value = false
+}
 </script>
 
 <template>
   <div class="flex flex-col gap-6 size-full">
     <base-modal :is-open="selectedZone !== null" @close="closeDetailsModal">
       <zone-details :zone="selectedZone" />
+    </base-modal>
+
+    <base-modal :is-open="isCreating" @close="closeCreateModal">
+      <zone-details :zone="zonesStore.createEmpty()" @create="closeCreateModal" />
     </base-modal>
     <!-- Main content card -->
     <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
@@ -143,6 +155,7 @@ function closeDetailsModal() {
             </div>
             <button
               class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+              @click="openCreateModal"
             >
               <plus-icon class="size-4" />
               Agregar Zona

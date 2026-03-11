@@ -94,5 +94,28 @@ export const useUsersStore = defineStore('users', () => {
   const activeCount = computed(() => users.value.filter((u) => u.enabled).length)
   const inactiveCount = computed(() => users.value.filter((u) => !u.enabled).length)
 
-  return { users, activeCount, inactiveCount }
+  function createEmpty() {
+    return {
+      id: null,
+      name: '',
+      enabled: true,
+      credential: null,
+      roles: buildRoles([]),
+      plates: buildPlates([]),
+    }
+  }
+
+  function addUser(data) {
+    const id = Math.max(0, ...users.value.map((u) => u.id)) + 1
+    users.value.push({
+      id,
+      name: data.name,
+      enabled: data.enabled,
+      credential: data.credential,
+      roles: data.roles.map((r) => ({ ...r, original: r.enabled })),
+      plates: data.plates.map((p) => ({ ...p, original: p.enabled, isLocalNew: undefined })),
+    })
+  }
+
+  return { users, activeCount, inactiveCount, createEmpty, addUser }
 })
