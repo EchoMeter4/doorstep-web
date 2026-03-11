@@ -128,7 +128,7 @@ function closeCreateModal() {
       <access-method-details :access-method="store.createEmpty()" @create="closeCreateModal" />
     </base-modal>
 
-    <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
+    <div class="bg-white shadow-sm rounded-4xl">
       <base-table
         :columns="['tipo', 'identificador', 'propietario', 'zonas autorizadas', 'estatus']"
         grid-cols="grid-cols-[14%_22%_20%_30%_14%]"

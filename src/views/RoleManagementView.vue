@@ -118,7 +118,7 @@ function closeCreateModal() {
     </base-modal>
 
     <!-- Main content card -->
-    <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
+    <div class="bg-white shadow-sm rounded-4xl">
       <base-table
         :columns="['rol', 'usuarios asignados', 'zonas restringidas', 'estatus']"
         grid-cols="grid-cols-[30%_25%_30%_15%]"

@@ -121,7 +121,7 @@ function closeCreateModal() {
       <zone-details :zone="zonesStore.createEmpty()" @create="closeCreateModal" />
     </base-modal>
     <!-- Main content card -->
-    <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
+    <div class="bg-white shadow-sm rounded-4xl">
       <base-table
         :columns="['zona', 'tipo', 'roles con acceso', 'estatus']"
         grid-cols="grid-cols-[38%_15%_32%_15%]"

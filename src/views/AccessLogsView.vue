@@ -136,7 +136,7 @@ function closeDetailsModal() {
     </base-modal>
 
     <!-- Main content card -->
-    <div class="bg-white shadow-sm rounded-4xl overflow-hidden">
+    <div class="bg-white shadow-sm rounded-4xl">
       <base-table
         :columns="['Credencial', 'Usuario(s)', 'Zona', 'Fecha y Hora', 'Estatus']"
         grid-cols="grid-cols-[16%_25%_25%_17%_17%]"
