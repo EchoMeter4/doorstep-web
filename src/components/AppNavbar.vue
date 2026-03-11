@@ -21,13 +21,6 @@ const isDropdownOpen = ref(false)
     <h1 class="text-xl font-semibold whitespace-nowrap">{{ props.title }}</h1>
 
     <div class="flex items-center gap-2">
-      <!-- Notifications button (non-functional) -->
-      <button
-        class="flex justify-center items-center bg-amber-50 hover:bg-amber-100 rounded-2xl size-10 transition-colors"
-      >
-        <bell-icon class="size-5 text-amber-400" />
-      </button>
-
       <!-- User dropdown -->
       <div class="relative" v-click-outside-modal="() => (isDropdownOpen = false)">
         <div
@@ -38,7 +31,7 @@ const isDropdownOpen = ref(false)
           <img
             src="@/assets/pfp.JPG"
             alt="foto de perfil"
-            class="size-10 rounded-2xl object-cover"
+            class="size-10 rounded-2xl object-cover pointer-events-none select-none"
           />
           <div class="flex flex-col items-start">
             <span class="text-sm font-medium text-brand-primary leading-snug">

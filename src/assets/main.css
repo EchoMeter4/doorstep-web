@@ -3,34 +3,40 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-family-sans: 'Poppins', sans-serif;
+    --font-family-sans: 'Poppins', sans-serif;
 
-  --color-brand-primary-50: #eef3ff;
-  --color-brand-primary-100: #dbe6ff;
-  --color-brand-primary-200: #b8ccff;
-  --color-brand-primary-300: #8eacff;
-  --color-brand-primary-400: #5f85f7;
-  --color-brand-primary-500: #2b4992;
-  --color-brand-primary-600: #223a78;
-  --color-brand-primary-700: #1b2e63;
-  --color-brand-primary-800: #14255a;
-  --color-brand-primary-900: #0f1e49;
+    --color-brand-primary-50: #eef3ff;
+    --color-brand-primary-100: #dbe6ff;
+    --color-brand-primary-200: #b8ccff;
+    --color-brand-primary-300: #8eacff;
+    --color-brand-primary-400: #5f85f7;
+    --color-brand-primary-500: #2b4992;
+    --color-brand-primary-600: #223a78;
+    --color-brand-primary-700: #1b2e63;
+    --color-brand-primary-800: #14255a;
+    --color-brand-primary-900: #0f1e49;
 
-  --color-brand-primary: var(--color-brand-primary-900);
+    --color-brand-primary: var(--color-brand-primary-900);
 
-  --color-brand-secondary: #4079ed;
-  --color-brand-secondary-hover: #386ad1;
+    --color-brand-secondary: #4079ed;
+    --color-brand-secondary-hover: #386ad1;
+}
+
+@layer utilities {
+    .scrollbar-gutter-stable {
+        scrollbar-gutter: stable;
+    }
 }
 
 body {
-  @apply font-sans;
-  background-color: #fafbfc;
+    @apply font-sans;
+    background-color: #fafbfc;
 }
 
 button:hover {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 button:disabled {
-  cursor: not-allowed;
+    cursor: not-allowed;
 }
