@@ -82,85 +82,83 @@ function closeCreateModal() {
     </base-modal>
 
     <!-- Main content card -->
-    <div class="bg-white shadow-sm rounded-4xl">
-      <base-table
-        :columns="['name', 'company', 'passes', 'status']"
-        grid-cols="grid-cols-[32%_28%_20%_20%]"
-      >
-        <template #filters>
-          <div class="flex items-center gap-3">
-            <search-input v-model="search" placeholder="Buscar visitante..." class="flex-1" />
-            <div class="flex flex-row items-center gap-2">
-              <filter-toggle
-                v-model="activeStatusFilter"
-                label="Activo"
-                value="active"
-                :count="visitorsStore.activeCount"
-                dot-class="bg-green-500"
-                active-class="border-green-300 bg-green-50 text-green-700"
-              />
-              <filter-toggle
-                v-model="activeStatusFilter"
-                label="Inactivo"
-                value="inactive"
-                :count="visitorsStore.inactiveCount"
-                dot-class="bg-gray-400"
-                active-class="border-gray-400 bg-gray-100 text-gray-700"
-              />
-            </div>
-            <button
-              class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
-              @click="openCreateModal"
+    <base-table
+      :columns="['name', 'company', 'passes', 'status']"
+      grid-cols="grid-cols-[32%_28%_20%_20%]"
+    >
+      <template #filters>
+        <div class="flex items-center gap-3">
+          <search-input v-model="search" placeholder="Buscar visitante..." class="flex-1" />
+          <div class="flex flex-row items-center gap-2">
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Activo"
+              value="active"
+              :count="visitorsStore.activeCount"
+              dot-class="bg-green-500"
+              active-class="border-green-300 bg-green-50 text-green-700"
+            />
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Inactivo"
+              value="inactive"
+              :count="visitorsStore.inactiveCount"
+              dot-class="bg-gray-400"
+              active-class="border-gray-400 bg-gray-100 text-gray-700"
+            />
+          </div>
+          <button
+            class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+            @click="openCreateModal"
+          >
+            <plus-icon class="size-4" />
+            Agregar Visitante
+          </button>
+        </div>
+      </template>
+
+      <template #rows>
+        <div
+          v-for="visitor in filteredVisitors"
+          :key="visitor.id"
+          class="grid grid-cols-[32%_28%_20%_20%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+          role="button"
+          @click="openDetailsModal(visitor)"
+        >
+          <!-- Nombre -->
+          <div class="px-6 py-4">
+            <p class="text-sm font-medium text-gray-900">{{ visitor.name }}</p>
+          </div>
+
+          <!-- Empresa -->
+          <div class="px-6 py-4">
+            <p class="text-sm text-gray-600">{{ visitor.company || '—' }}</p>
+          </div>
+
+          <!-- Pases badge -->
+          <div class="px-6 py-4">
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600"
             >
-              <plus-icon class="size-4" />
-              Agregar Visitante
-            </button>
-          </div>
-        </template>
-
-        <template #rows>
-          <div
-            v-for="visitor in filteredVisitors"
-            :key="visitor.id"
-            class="grid grid-cols-[32%_28%_20%_20%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
-            role="button"
-            @click="openDetailsModal(visitor)"
-          >
-            <!-- Nombre -->
-            <div class="px-6 py-4">
-              <p class="text-sm font-medium text-gray-900">{{ visitor.name }}</p>
-            </div>
-
-            <!-- Empresa -->
-            <div class="px-6 py-4">
-              <p class="text-sm text-gray-600">{{ visitor.company || '—' }}</p>
-            </div>
-
-            <!-- Pases badge -->
-            <div class="px-6 py-4">
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600"
-              >
-                {{ visitor.passes.length }}
-                {{ visitor.passes.length === 1 ? 'pase' : 'pases' }}
-              </span>
-            </div>
-
-            <!-- Status pill -->
-            <div class="px-6 py-4 w-full">
-              <pill-select v-model="visitor.enabled" :options="visitorStatusOptions" />
-            </div>
+              {{ visitor.passes.length }}
+              {{ visitor.passes.length === 1 ? 'pase' : 'pases' }}
+            </span>
           </div>
 
-          <div
-            v-if="filteredVisitors.length === 0"
-            class="px-6 py-12 text-center text-sm text-gray-400"
-          >
-            No se encontraron visitantes
+          <!-- Status pill -->
+          <div class="px-6 py-4 w-full">
+            <pill-select v-model="visitor.enabled" :options="visitorStatusOptions" />
           </div>
-        </template>
-      </base-table>
-    </div>
+        </div>
+
+        <div
+          v-if="filteredVisitors.length === 0"
+          class="px-6 py-12 text-center text-sm text-gray-400"
+        >
+          No se encontraron visitantes
+        </div>
+      </template>
+    </base-table>
   </div>
 </template>
 

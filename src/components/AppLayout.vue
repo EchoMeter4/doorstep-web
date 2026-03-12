@@ -13,10 +13,10 @@ const route = useRoute()
       <div
         class="flex-1 flex flex-col space-y-2.5 overflow-auto px-2.5 pb-2.5 scrollbar-gutter-stable"
       >
-        <header>
-          <app-navbar :title="route.meta.title ?? ''" class="sticky top-0 z-100 shrink-0 mt-2.5" />
+        <header class="sticky top-0 z-100 shrink-0 mt-2.5">
+          <app-navbar :title="route.meta.title ?? ''" />
         </header>
-        <main class="h-fit">
+        <main class="h-fit w-fit min-w-full">
           <router-view />
         </main>
       </div>

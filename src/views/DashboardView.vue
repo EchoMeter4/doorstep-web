@@ -183,8 +183,6 @@ async function generatePdf() {
     startY: 38,
     head: [['Métrica', 'Valor']],
     body: [
-      ['Total Vehículos Registrados', String(platesStore.plates.length)],
-      ['Usuarios Registrados', String(usersStore.users.length)],
       ['Accesos Vehiculares Hoy', String(vehicularToday.value)],
       ['Accesos Peatonales Hoy', String(pedestrianToday.value)],
       ['Accesos Autorizados (período)', String(authorizedCount.value)],
@@ -268,25 +266,7 @@ async function generatePdf() {
     </div>
 
     <!-- Stat cards -->
-    <div class="grid grid-cols-6 gap-4">
-      <StatCard
-        :icon="TruckIcon"
-        icon-color="text-blue-500"
-        icon-bg="bg-blue-50"
-        label="Vehículos Registrados"
-        :value="platesStore.plates.length"
-        trend="Total registrados"
-        :trend-up="true"
-      />
-      <StatCard
-        :icon="UsersIcon"
-        icon-color="text-green-500"
-        icon-bg="bg-green-50"
-        label="Usuarios Registrados"
-        :value="usersStore.users.length"
-        trend="Total registrados"
-        :trend-up="true"
-      />
+    <div class="grid grid-cols-4 gap-4">
       <StatCard
         :icon="IdentificationIcon"
         icon-color="text-orange-500"

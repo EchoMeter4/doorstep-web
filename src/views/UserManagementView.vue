@@ -106,93 +106,84 @@ function closeCreateModal() {
     </base-modal>
 
     <!-- Main content card -->
-    <div class="bg-white shadow-sm rounded-4xl">
-      <base-table
-        :columns="['usuario', 'roles', 'placas', 'credencial', 'estatus']"
-        grid-cols="grid-cols-[22%_22%_18%_24%_14%]"
-      >
-        <template #filters>
-          <div class="flex items-center gap-3">
-            <search-input v-model="search" placeholder="Buscar usuario..." class="flex-1" />
-            <filter-dropdown v-model="activeRoleFilter" label="Rol" :options="roleFilterOptions" />
-            <div class="flex flex-row items-center gap-2">
-              <filter-toggle
-                v-model="activeStatusFilter"
-                label="Activo"
-                value="active"
-                :count="usersStore.activeCount"
-                dot-class="bg-green-500"
-                active-class="border-green-300 bg-green-50 text-green-700"
-              />
-              <filter-toggle
-                v-model="activeStatusFilter"
-                label="Inactivo"
-                value="inactive"
-                :count="usersStore.inactiveCount"
-                dot-class="bg-gray-400"
-                active-class="border-gray-400 bg-gray-100 text-gray-700"
-              />
-            </div>
-            <button
-              class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
-              @click="openCreateModal"
-            >
-              <plus-icon class="size-4" />
-              Agregar Usuario
-            </button>
+    <base-table
+      :columns="['usuario', 'roles', 'placas', 'credencial', 'estatus']"
+      grid-cols="grid-cols-[22%_22%_18%_24%_14%]"
+    >
+      <template #filters>
+        <div class="flex items-center gap-3">
+          <search-input v-model="search" placeholder="Buscar usuario..." class="flex-1" />
+          <filter-dropdown v-model="activeRoleFilter" label="Rol" :options="roleFilterOptions" />
+          <div class="flex flex-row items-center gap-2">
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Activo"
+              value="active"
+              :count="usersStore.activeCount"
+              dot-class="bg-green-500"
+              active-class="border-green-300 bg-green-50 text-green-700"
+            />
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Inactivo"
+              value="inactive"
+              :count="usersStore.inactiveCount"
+              dot-class="bg-gray-400"
+              active-class="border-gray-400 bg-gray-100 text-gray-700"
+            />
           </div>
-        </template>
-
-        <template #rows>
-          <div
-            v-for="user in filteredUsers"
-            :key="user.id"
-            class="grid grid-cols-[22%_22%_18%_24%_14%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
-            role="button"
-            @click="openDetailsModal(user)"
+          <button
+            class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+            @click="openCreateModal"
           >
-            <!-- User name -->
-            <div class="px-6 py-4">
-              <p class="text-sm font-medium text-gray-900">{{ user.name }}</p>
-            </div>
+            <plus-icon class="size-4" />
+            Agregar Usuario
+          </button>
+        </div>
+      </template>
 
-            <!-- Roles -->
-            <div class="px-6 py-4">
-              <overflow-badge-list
-                :items="user.roles.filter((r) => r.enabled).map((r) => r.name)"
-              />
-            </div>
-
-            <!-- Plates -->
-            <div class="px-6 py-4">
-              <overflow-badge-list
-                :items="user.plates.filter((p) => p.enabled).map((p) => p.name)"
-              />
-            </div>
-
-            <!-- Credential -->
-            <div class="px-6 py-4">
-              <span v-if="user.credential" class="text-sm text-gray-700">
-                {{ user.credential.type }} · {{ user.credential.number }}
-              </span>
-              <span v-else class="text-sm text-gray-300">Sin credencial</span>
-            </div>
-
-            <!-- Status pill -->
-            <div class="px-6 py-4 w-full">
-              <pill-select v-model="user.enabled" :options="userStatusOptions" />
-            </div>
+      <template #rows>
+        <div
+          v-for="user in filteredUsers"
+          :key="user.id"
+          class="grid grid-cols-[22%_22%_18%_24%_14%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+          role="button"
+          @click="openDetailsModal(user)"
+        >
+          <!-- User name -->
+          <div class="px-6 py-4">
+            <p class="text-sm font-medium text-gray-900">{{ user.name }}</p>
           </div>
 
-          <div
-            v-if="filteredUsers.length === 0"
-            class="px-6 py-12 text-center text-sm text-gray-400"
-          >
-            No se encontraron usuarios
+          <!-- Roles -->
+          <div class="px-6 py-4">
+            <overflow-badge-list :items="user.roles.filter((r) => r.enabled).map((r) => r.name)" />
           </div>
-        </template>
-      </base-table>
-    </div>
+
+          <!-- Plates -->
+          <div class="px-6 py-4">
+            <overflow-badge-list :items="user.plates.filter((p) => p.enabled).map((p) => p.name)" />
+          </div>
+
+          <!-- Credential -->
+          <div class="px-6 py-4">
+            <span v-if="user.credential" class="text-sm text-gray-700">
+              {{ user.credential.type }} · {{ user.credential.number }}
+            </span>
+            <span v-else class="text-sm text-gray-300">Sin credencial</span>
+          </div>
+
+          <!-- Status pill -->
+          <div class="px-6 py-4 w-full">
+            <pill-select v-model="user.enabled" :options="userStatusOptions" />
+          </div>
+        </div>
+
+        <div v-if="filteredUsers.length === 0" class="px-6 py-12 text-center text-sm text-gray-400">
+          No se encontraron usuarios
+        </div>
+      </template>
+    </base-table>
   </div>
 </template>
 

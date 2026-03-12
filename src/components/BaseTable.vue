@@ -6,16 +6,16 @@ defineProps({
 </script>
 
 <template>
-  <div>
-    <div v-if="$slots.filters" class="px-6 pt-4 pb-3 border-b border-gray-200 flex flex-col gap-3">
+  <div class="bg-white shadow-sm rounded-4xl p-5 flex flex-col gap-5">
+    <div v-if="$slots.filters" class="flex flex-col gap-3">
       <slot name="filters" />
     </div>
     <div class="min-h-0">
       <div
-        class="grid bg-gray-50 py-5 text-xs font-semibold text-gray-600 uppercase tracking-wider"
+        class="grid bg-brand-primary py-5 text-xs font-semibold text-white uppercase tracking-wider rounded-[18px]"
         :class="gridCols"
       >
-        <div v-for="col in columns" :key="col" class="px-6">{{ col }}</div>
+        <div v-for="col in columns" :key="col" class="px-6 content-center">{{ col }}</div>
       </div>
       <slot name="rows" />
     </div>

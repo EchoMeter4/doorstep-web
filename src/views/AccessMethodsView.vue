@@ -126,99 +126,97 @@ function closeCreateModal() {
       <access-method-details :access-method="store.createEmpty()" @create="closeCreateModal" />
     </base-modal>
 
-    <div class="bg-white shadow-sm rounded-4xl">
-      <base-table
-        :columns="['tipo', 'identificador', 'propietario', 'zonas autorizadas', 'estatus']"
-        grid-cols="grid-cols-[14%_22%_20%_30%_14%]"
-      >
-        <template #filters>
-          <div class="flex items-center gap-3">
-            <search-input v-model="search" placeholder="Buscar método..." class="flex-1" />
-            <filter-dropdown v-model="activeTypeFilter" label="Tipo" :options="typeFilterOptions" />
-            <filter-dropdown
-              v-model="activeUserFilter"
-              label="Usuario"
-              :options="userFilterOptions"
+    <base-table
+      :columns="['tipo', 'identificador', 'propietario', 'zonas autorizadas', 'estatus']"
+      grid-cols="grid-cols-[14%_22%_20%_30%_14%]"
+    >
+      <template #filters>
+        <div class="flex items-center gap-3">
+          <search-input v-model="search" placeholder="Buscar método..." class="flex-1" />
+          <filter-dropdown v-model="activeTypeFilter" label="Tipo" :options="typeFilterOptions" />
+          <filter-dropdown
+            v-model="activeUserFilter"
+            label="Usuario"
+            :options="userFilterOptions"
+          />
+          <div class="flex flex-row items-center gap-2">
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Activo"
+              value="active"
+              :count="store.activeCount"
+              dot-class="bg-green-500"
+              active-class="border-green-300 bg-green-50 text-green-700"
             />
-            <div class="flex flex-row items-center gap-2">
-              <filter-toggle
-                v-model="activeStatusFilter"
-                label="Activo"
-                value="active"
-                :count="store.activeCount"
-                dot-class="bg-green-500"
-                active-class="border-green-300 bg-green-50 text-green-700"
-              />
-              <filter-toggle
-                v-model="activeStatusFilter"
-                label="Inactivo"
-                value="inactive"
-                :count="store.inactiveCount"
-                dot-class="bg-gray-400"
-                active-class="border-gray-400 bg-gray-100 text-gray-700"
-              />
-            </div>
-            <button
-              class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
-              @click="openCreateModal"
-            >
-              <plus-icon class="size-4" />
-              Agregar Método
-            </button>
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Inactivo"
+              value="inactive"
+              :count="store.inactiveCount"
+              dot-class="bg-gray-400"
+              active-class="border-gray-400 bg-gray-100 text-gray-700"
+            />
           </div>
-        </template>
-
-        <template #rows>
-          <div
-            v-for="method in filteredMethods"
-            :key="method.id"
-            class="grid grid-cols-[14%_22%_20%_30%_14%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
-            role="button"
-            @click="openDetailsModal(method)"
+          <button
+            class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+            @click="openCreateModal"
           >
-            <!-- Type badge -->
-            <div class="px-6 py-4">
-              <icon-badge
-                :icon="credentialTypeBadge[method.type].icon"
-                :label="credentialTypeBadge[method.type].label"
-                :color-class="credentialTypeBadge[method.type].colorClass"
-              />
-            </div>
+            <plus-icon class="size-4" />
+            Agregar Método
+          </button>
+        </div>
+      </template>
 
-            <!-- Identifier + label -->
-            <div class="px-6 py-4">
-              <p class="text-sm font-medium text-gray-900">{{ method.value }}</p>
-              <p class="text-xs text-gray-400 mt-0.5">{{ method.label }}</p>
-            </div>
-
-            <!-- Owner -->
-            <div class="px-6 py-4">
-              <p v-if="method.user" class="text-sm text-gray-900">{{ method.user.name }}</p>
-              <p v-else class="text-sm italic text-gray-400">Sin propietario</p>
-            </div>
-
-            <!-- Authorized zones -->
-            <div class="px-6 py-4">
-              <overflow-badge-list
-                :items="method.zones.filter((z) => z.enabled).map((z) => z.name)"
-              />
-            </div>
-
-            <!-- Status pill -->
-            <div class="px-6 py-4 w-full">
-              <pill-select v-model="method.enabled" :options="statusOptions" />
-            </div>
+      <template #rows>
+        <div
+          v-for="method in filteredMethods"
+          :key="method.id"
+          class="grid grid-cols-[14%_22%_20%_30%_14%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+          role="button"
+          @click="openDetailsModal(method)"
+        >
+          <!-- Type badge -->
+          <div class="px-6 py-4">
+            <icon-badge
+              :icon="credentialTypeBadge[method.type].icon"
+              :label="credentialTypeBadge[method.type].label"
+              :color-class="credentialTypeBadge[method.type].colorClass"
+            />
           </div>
 
-          <div
-            v-if="filteredMethods.length === 0"
-            class="px-6 py-12 text-center text-sm text-gray-400"
-          >
-            No se encontraron métodos de acceso
+          <!-- Identifier + label -->
+          <div class="px-6 py-4">
+            <p class="text-sm font-medium text-gray-900">{{ method.value }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ method.label }}</p>
           </div>
-        </template>
-      </base-table>
-    </div>
+
+          <!-- Owner -->
+          <div class="px-6 py-4">
+            <p v-if="method.user" class="text-sm text-gray-900">{{ method.user.name }}</p>
+            <p v-else class="text-sm italic text-gray-400">Sin propietario</p>
+          </div>
+
+          <!-- Authorized zones -->
+          <div class="px-6 py-4">
+            <overflow-badge-list
+              :items="method.zones.filter((z) => z.enabled).map((z) => z.name)"
+            />
+          </div>
+
+          <!-- Status pill -->
+          <div class="px-6 py-4 w-full">
+            <pill-select v-model="method.enabled" :options="statusOptions" />
+          </div>
+        </div>
+
+        <div
+          v-if="filteredMethods.length === 0"
+          class="px-6 py-12 text-center text-sm text-gray-400"
+        >
+          No se encontraron métodos de acceso
+        </div>
+      </template>
+    </base-table>
   </div>
 </template>
 

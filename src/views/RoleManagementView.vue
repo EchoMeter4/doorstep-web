@@ -118,87 +118,82 @@ function closeCreateModal() {
     </base-modal>
 
     <!-- Main content card -->
-    <div class="bg-white shadow-sm rounded-4xl">
-      <base-table
-        :columns="['rol', 'usuarios asignados', 'zonas restringidas', 'estatus']"
-        grid-cols="grid-cols-[30%_25%_30%_15%]"
-      >
-        <template #filters>
-          <div class="flex items-center gap-3">
-            <search-input v-model="search" placeholder="Buscar rol..." class="flex-1" />
-            <filter-dropdown
-              v-model="activeUserFilter"
-              label="Usuario"
-              :options="userFilterOptions"
+    <base-table
+      :columns="['rol', 'usuarios asignados', 'zonas restringidas', 'estatus']"
+      grid-cols="grid-cols-[30%_25%_30%_15%]"
+    >
+      <template #filters>
+        <div class="flex items-center gap-3">
+          <search-input v-model="search" placeholder="Buscar rol..." class="flex-1" />
+          <filter-dropdown
+            v-model="activeUserFilter"
+            label="Usuario"
+            :options="userFilterOptions"
+          />
+          <filter-dropdown v-model="activeZoneFilter" label="Zona" :options="zoneFilterOptions" />
+          <div class="flex flex-row items-center gap-2">
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Activo"
+              value="active"
+              :count="rolesStore.activeCount"
+              dot-class="bg-green-500"
+              active-class="border-green-300 bg-green-50 text-green-700"
             />
-            <filter-dropdown v-model="activeZoneFilter" label="Zona" :options="zoneFilterOptions" />
-            <div class="flex flex-row items-center gap-2">
-              <filter-toggle
-                v-model="activeStatusFilter"
-                label="Activo"
-                value="active"
-                :count="rolesStore.activeCount"
-                dot-class="bg-green-500"
-                active-class="border-green-300 bg-green-50 text-green-700"
-              />
-              <filter-toggle
-                v-model="activeStatusFilter"
-                label="Inactivo"
-                value="inactive"
-                :count="rolesStore.inactiveCount"
-                dot-class="bg-gray-400"
-                active-class="border-gray-400 bg-gray-100 text-gray-700"
-              />
-            </div>
-            <button
-              class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
-              @click="openCreateModal"
-            >
-              <plus-icon class="size-4" />
-              Agregar Rol
-            </button>
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Inactivo"
+              value="inactive"
+              :count="rolesStore.inactiveCount"
+              dot-class="bg-gray-400"
+              active-class="border-gray-400 bg-gray-100 text-gray-700"
+            />
           </div>
-        </template>
-
-        <template #rows>
-          <div
-            v-for="role in filteredRoles"
-            :key="role.id"
-            class="grid grid-cols-[30%_25%_30%_15%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
-            role="button"
-            @click="openDetailsModal(role)"
+          <button
+            class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+            @click="openCreateModal"
           >
-            <!-- Role name + description -->
-            <div class="px-6 py-4">
-              <p class="text-sm font-medium text-gray-900">{{ role.name }}</p>
-              <p class="text-xs text-gray-400 mt-0.5">{{ role.description }}</p>
-            </div>
+            <plus-icon class="size-4" />
+            Agregar Rol
+          </button>
+        </div>
+      </template>
 
-            <!-- Assigned users -->
-            <div class="px-6 py-4">
-              <overflow-badge-list :items="role.users.map((u) => u.name)" />
-            </div>
-
-            <!-- Restricted zones -->
-            <div class="px-6 py-4">
-              <overflow-badge-list :items="role.restrictedZones.map((z) => z.name)" />
-            </div>
-
-            <!-- Status pill -->
-            <div class="px-6 py-4 w-full">
-              <pill-select v-model="role.enabled" :options="roleStatusOptions" />
-            </div>
+      <template #rows>
+        <div
+          v-for="role in filteredRoles"
+          :key="role.id"
+          class="grid grid-cols-[30%_25%_30%_15%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+          role="button"
+          @click="openDetailsModal(role)"
+        >
+          <!-- Role name + description -->
+          <div class="px-6 py-4">
+            <p class="text-sm font-medium text-gray-900">{{ role.name }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ role.description }}</p>
           </div>
 
-          <div
-            v-if="filteredRoles.length === 0"
-            class="px-6 py-12 text-center text-sm text-gray-400"
-          >
-            No se encontraron roles
+          <!-- Assigned users -->
+          <div class="px-6 py-4">
+            <overflow-badge-list :items="role.users.map((u) => u.name)" />
           </div>
-        </template>
-      </base-table>
-    </div>
+
+          <!-- Restricted zones -->
+          <div class="px-6 py-4">
+            <overflow-badge-list :items="role.restrictedZones.map((z) => z.name)" />
+          </div>
+
+          <!-- Status pill -->
+          <div class="px-6 py-4 w-full">
+            <pill-select v-model="role.enabled" :options="roleStatusOptions" />
+          </div>
+        </div>
+
+        <div v-if="filteredRoles.length === 0" class="px-6 py-12 text-center text-sm text-gray-400">
+          No se encontraron roles
+        </div>
+      </template>
+    </base-table>
   </div>
 </template>
 
