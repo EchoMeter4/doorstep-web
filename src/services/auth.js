@@ -6,7 +6,7 @@ export async function csrf() {
 
 export async function login(params) {
   await csrf()
-  return await http.post('/login', params)
+  return await http.post(import.meta.env.VITE_BASE_URL + '/login', params)
 }
 
 export async function me() {
