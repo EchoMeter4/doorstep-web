@@ -10,6 +10,8 @@ const props = defineProps({
   log: { type: Object, required: true },
 })
 
+const emit = defineEmits(['close'])
+
 const tabDefs = computed(() => [
   {
     key: 'resumen',
@@ -36,7 +38,7 @@ const tabDefs = computed(() => [
 </script>
 
 <template>
-  <base-details-panel :tab-defs="tabDefs">
+  <base-details-panel :tab-defs="tabDefs" @close="emit('close')">
     <template #header-title>
       <span class="font-semibold text-gray-900">{{ log.credentialValue }}</span>
     </template>

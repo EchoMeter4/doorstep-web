@@ -7,7 +7,6 @@ import FilterToggle from '@/components/FilterToggle.vue'
 import FilterDropdown from '@/components/FilterDropdown.vue'
 import OverflowBadgeList from '@/components/OverflowBadgeList.vue'
 import PillSelect from '@/components/PillSelect.vue'
-import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import UserDetails from '@/components/users/UserDetails.vue'
 import { useUsersStore } from '@/stores/users'
@@ -97,13 +96,8 @@ function closeCreateModal() {
 
 <template>
   <div class="flex flex-col gap-6 size-full">
-    <base-modal :is-open="selectedUser !== null" @close="closeDetailsModal">
-      <user-details :user="selectedUser" @delete="handleDelete" />
-    </base-modal>
-
-    <base-modal :is-open="isCreating" @close="closeCreateModal">
-      <user-details :user="usersStore.createEmpty()" @create="closeCreateModal" />
-    </base-modal>
+    <user-details v-if="selectedUser" :user="selectedUser" @delete="handleDelete" @close="closeDetailsModal" />
+    <user-details v-if="isCreating" :user="usersStore.createEmpty()" @create="closeCreateModal" @close="closeCreateModal" />
 
     <!-- Main content card -->
     <base-table

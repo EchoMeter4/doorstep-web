@@ -8,7 +8,6 @@ import FilterDropdown from '@/components/FilterDropdown.vue'
 import OverflowBadgeList from '@/components/OverflowBadgeList.vue'
 import PillSelect from '@/components/PillSelect.vue'
 import IconBadge from '@/components/IconBadge.vue'
-import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import AccessMethodDetails from '@/components/accessMethods/AccessMethodDetails.vue'
 import { useAccessMethodsStore } from '@/stores/accessMethods.js'
@@ -118,13 +117,8 @@ function closeCreateModal() {
 
 <template>
   <div class="flex flex-col gap-6 size-full">
-    <base-modal :is-open="selectedMethod !== null" @close="closeDetailsModal">
-      <access-method-details :access-method="selectedMethod" @delete="handleDelete" />
-    </base-modal>
-
-    <base-modal :is-open="isCreating" @close="closeCreateModal">
-      <access-method-details :access-method="store.createEmpty()" @create="closeCreateModal" />
-    </base-modal>
+    <access-method-details v-if="selectedMethod" :access-method="selectedMethod" @delete="handleDelete" @close="closeDetailsModal" />
+    <access-method-details v-if="isCreating" :access-method="store.createEmpty()" @create="closeCreateModal" @close="closeCreateModal" />
 
     <base-table
       :columns="['tipo', 'identificador', 'propietario', 'zonas autorizadas', 'estatus']"

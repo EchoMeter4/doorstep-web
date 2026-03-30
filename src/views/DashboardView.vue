@@ -1,13 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import {
-  UsersIcon,
-  TruckIcon,
-  UserIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  IdentificationIcon,
-} from '@heroicons/vue/24/solid'
+import { CheckCircleIcon, IdentificationIcon, UserIcon, XCircleIcon } from '@heroicons/vue/24/solid'
 import { useLogsStore } from '@/stores/logs.js'
 import { useUsersStore } from '@/stores/users.js'
 import { usePlatesStore } from '@/stores/plates.js'
@@ -221,7 +214,7 @@ async function generatePdf() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#FAFBFC] p-6 space-y-6">
+  <div class="min-h-screen min-w-full w-fit bg-[#FAFBFC] p-6 space-y-6">
     <!-- Filter bar -->
     <div class="bg-white rounded-4xl shadow-sm p-5 flex flex-wrap items-center gap-3">
       <div class="flex items-center gap-2">

@@ -13,7 +13,7 @@ const props = defineProps({
   visitor: { type: Object, required: true },
 })
 
-const emit = defineEmits(['delete', 'create'])
+const emit = defineEmits(['delete', 'create', 'close'])
 
 const visitorsStore = useVisitorsStore()
 const zonesStore = useZonesStore()
@@ -171,7 +171,7 @@ const tabDefs = computed(() => [
 </script>
 
 <template>
-  <base-details-panel :tab-defs="tabDefs">
+  <base-details-panel :tab-defs="tabDefs" @close="emit('close')">
     <template #header-title>
       <span class="font-semibold">{{
         isNew ? 'Nuevo Visitante' : localDetails.name || 'Visitante'

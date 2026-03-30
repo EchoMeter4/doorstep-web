@@ -5,7 +5,6 @@ import { PlusIcon } from '@heroicons/vue/24/solid'
 import SearchInput from '@/components/SearchInput.vue'
 import FilterToggle from '@/components/FilterToggle.vue'
 import PillSelect from '@/components/PillSelect.vue'
-import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import VisitorDetails from '@/components/visitors/VisitorDetails.vue'
 import { useVisitorsStore } from '@/stores/visitors'
@@ -73,13 +72,8 @@ function closeCreateModal() {
 
 <template>
   <div class="flex flex-col gap-6 size-full">
-    <base-modal :is-open="selectedVisitor !== null" @close="closeDetailsModal">
-      <visitor-details :visitor="selectedVisitor" @delete="handleDelete" />
-    </base-modal>
-
-    <base-modal :is-open="isCreating" @close="closeCreateModal">
-      <visitor-details :visitor="visitorsStore.createEmpty()" @create="closeCreateModal" />
-    </base-modal>
+    <visitor-details v-if="selectedVisitor" :visitor="selectedVisitor" @delete="handleDelete" @close="closeDetailsModal" />
+    <visitor-details v-if="isCreating" :visitor="visitorsStore.createEmpty()" @create="closeCreateModal" @close="closeCreateModal" />
 
     <!-- Main content card -->
     <base-table

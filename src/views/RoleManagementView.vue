@@ -7,7 +7,6 @@ import FilterToggle from '@/components/FilterToggle.vue'
 import FilterDropdown from '@/components/FilterDropdown.vue'
 import OverflowBadgeList from '@/components/OverflowBadgeList.vue'
 import PillSelect from '@/components/PillSelect.vue'
-import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import RoleDetails from '@/components/roles/RoleDetails.vue'
 import { useRolesStore } from '@/stores/roles'
@@ -103,19 +102,15 @@ function openCreateModal() {
   isCreating.value = true
 }
 function closeCreateModal() {
+  console.log('closing the modal allegedly')
   isCreating.value = false
 }
 </script>
 
 <template>
   <div class="flex flex-col gap-6 size-full">
-    <base-modal :is-open="selectedRole !== null" @close="closeDetailsModal">
-      <role-details :role="selectedRole" @delete="handleDelete" />
-    </base-modal>
-
-    <base-modal :is-open="isCreating" @close="closeCreateModal">
-      <role-details :role="rolesStore.createEmpty()" @create="closeCreateModal" />
-    </base-modal>
+    <role-details v-if="selectedRole" :role="selectedRole" @delete="handleDelete" @close="closeDetailsModal" />
+    <role-details v-if="isCreating" :role="rolesStore.createEmpty()" @create="closeCreateModal" @close="closeCreateModal" />
 
     <!-- Main content card -->
     <base-table

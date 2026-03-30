@@ -20,7 +20,7 @@ const props = defineProps({
   zone: { type: Object, required: true },
 })
 
-const emit = defineEmits(['delete', 'create'])
+const emit = defineEmits(['delete', 'create', 'close'])
 
 const zonesStore = useZonesStore()
 const isNew = computed(() => props.zone.id === null)
@@ -187,7 +187,7 @@ const tabDefs = computed(() => [
 </script>
 
 <template>
-  <base-details-panel :tab-defs="tabDefs">
+  <base-details-panel :tab-defs="tabDefs" @close="emit('close')">
     <template #header-title>
       <span class="font-semibold">{{ isNew ? 'Nueva Zona' : zone.name }}</span>
     </template>

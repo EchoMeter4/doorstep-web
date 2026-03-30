@@ -17,7 +17,7 @@ const props = defineProps({
   role: { type: Object, required: true },
 })
 
-const emit = defineEmits(['delete', 'create'])
+const emit = defineEmits(['delete', 'create', 'close'])
 
 const rolesStore = useRolesStore()
 const isNew = computed(() => props.role.id === null)
@@ -149,7 +149,7 @@ const tabDefs = computed(() => [
 </script>
 
 <template>
-  <base-details-panel :tab-defs="tabDefs">
+  <base-details-panel :tab-defs="tabDefs" @close="emit('close')">
     <template #header-title>
       <span class="font-semibold">{{ isNew ? 'Nuevo Rol' : role.name }}</span>
     </template>

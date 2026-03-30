@@ -8,7 +8,6 @@ import FilterToggle from '@/components/FilterToggle.vue'
 import IconBadge from '@/components/IconBadge.vue'
 import OverflowBadgeList from '@/components/OverflowBadgeList.vue'
 import PillSelect from '@/components/PillSelect.vue'
-import BaseModal from '@/components/BaseModal.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import ZoneDetails from '@/components/zones/ZoneDetails.vue'
 import { useZonesStore } from '@/stores/zones'
@@ -113,13 +112,8 @@ function closeCreateModal() {
 
 <template>
   <div class="flex flex-col gap-6 size-full">
-    <base-modal :is-open="selectedZone !== null" @close="closeDetailsModal">
-      <zone-details :zone="selectedZone" />
-    </base-modal>
-
-    <base-modal :is-open="isCreating" @close="closeCreateModal">
-      <zone-details :zone="zonesStore.createEmpty()" @create="closeCreateModal" />
-    </base-modal>
+    <zone-details v-if="selectedZone" :zone="selectedZone" @close="closeDetailsModal" />
+    <zone-details v-if="isCreating" :zone="zonesStore.createEmpty()" @create="closeCreateModal" @close="closeCreateModal" />
     <!-- Main content card -->
     <base-table
       :columns="['zona', 'tipo', 'roles con acceso', 'estatus']"

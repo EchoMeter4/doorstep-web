@@ -24,7 +24,7 @@ const props = defineProps({
   accessMethod: { type: Object, required: true },
 })
 
-const emit = defineEmits(['delete', 'create'])
+const emit = defineEmits(['delete', 'create', 'close'])
 
 const store = useAccessMethodsStore()
 const usersStore = useUsersStore()
@@ -229,7 +229,7 @@ const tabDefs = computed(() => [
 </script>
 
 <template>
-  <base-details-panel :tab-defs="tabDefs">
+  <base-details-panel :tab-defs="tabDefs" @close="emit('close')">
     <template #header-title>
       <span class="font-semibold">{{
         isNew ? 'Nuevo Método de Acceso' : localDetails.label || accessMethod.value
