@@ -5,8 +5,18 @@ export default {
       document.removeEventListener('click', el._clickOutside, true)
       delete el._clickOutside
     }
+    if (el._closeOnEscape) {
+      document.removeEventListener('keydown', el._closeOnEscape, true)
+      delete el._closeOnEscape
+    }
   },
   mounted(el, binding) {
+    el._closeOnEscape = function (event) {
+      if (event.key === 'Escape') {
+        binding.value(event)
+      }
+    }
+
     el._clickOutside = function (event) {
       if (el === event.target || el.contains(event.target)) {
         return
@@ -31,10 +41,13 @@ export default {
     }
 
     document.addEventListener('click', el._clickOutside, true)
+    document.addEventListener('keydown', el._closeOnEscape, true)
   },
 
   unmounted(el) {
     document.removeEventListener('click', el._clickOutside, true)
     delete el._clickOutside
+    document.removeEventListener('keydown', el._closeOnEscape, true)
+    delete el._closeOnEscape
   },
 }
