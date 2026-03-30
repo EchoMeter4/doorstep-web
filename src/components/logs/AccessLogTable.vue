@@ -5,7 +5,6 @@ import IconBadge from '@/components/IconBadge.vue'
 import {
   CheckCircleIcon,
   CreditCardIcon,
-  QrCodeIcon,
   TruckIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/solid'
@@ -14,8 +13,7 @@ import { ref } from 'vue'
 
 // --- Credential type badge config ---
 const credentialTypeBadge = {
-  rfid: { icon: CreditCardIcon, label: 'RFID', colorClass: 'bg-blue-50 text-blue-600' },
-  qr: { icon: QrCodeIcon, label: 'QR', colorClass: 'bg-purple-50 text-purple-600' },
+  credential: { icon: CreditCardIcon, label: 'Credential', colorClass: 'bg-blue-50 text-blue-600' },
   lpn: { icon: TruckIcon, label: 'Placa', colorClass: 'bg-orange-50 text-orange-600' },
 }
 
@@ -38,6 +36,7 @@ function formatTime(ts) {
 const props = defineProps({
   filteredLogs: { type: Array, required: true },
   tableClasses: { type: String, default: '' },
+  isLoading: { type: Boolean, default: false },
 })
 
 // --- Modal ---
@@ -122,7 +121,7 @@ function closeDetailsModal() {
           v-if="props.filteredLogs.length === 0"
           class="px-6 py-12 text-center text-sm text-gray-400"
         >
-          No se encontraron registros
+          {{ props.isLoading ? 'Cargando registros...' : 'No se encontraron registros' }}
         </div>
       </template>
     </base-table>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { CheckCircleIcon, IdentificationIcon, UserIcon, XCircleIcon } from '@heroicons/vue/24/solid'
 import { useLogsStore } from '@/stores/logs.js'
 import { useUsersStore } from '@/stores/users.js'
@@ -14,6 +14,8 @@ import RecentAccessList from '@/components/dashboard/RecentAccessList.vue'
 const logsStore = useLogsStore()
 const usersStore = useUsersStore()
 const platesStore = usePlatesStore()
+
+const isLoading = computed(() => logsStore.isLoading)
 
 // Date filter state — default to current month
 const now = new Date()
@@ -51,6 +53,9 @@ function setPreset(preset) {
 function onDateChange() {
   activePreset.value = null
 }
+
+onMounted(() => logsStore.fetchLogs(dateFrom.value, dateTo.value))
+watch([dateFrom, dateTo], ([from, to]) => logsStore.fetchLogs(from, to))
 
 // Helpers
 const isVehicular = (log) => log.credentialType === 'lpn'
@@ -223,6 +228,8 @@ async function generatePdf() {
           v-model="dateFrom"
           type="date"
           class="border border-gray-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-secondary"
+          :disabled="isLoading"
+          :class="isLoading ? 'opacity-50 cursor-not-allowed' : ''"
           @change="onDateChange"
         />
       </div>
@@ -232,6 +239,8 @@ async function generatePdf() {
           v-model="dateTo"
           type="date"
           class="border border-gray-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-secondary"
+          :disabled="isLoading"
+          :class="isLoading ? 'opacity-50 cursor-not-allowed' : ''"
           @change="onDateChange"
         />
       </div>
@@ -246,13 +255,16 @@ async function generatePdf() {
                 ? 'bg-brand-secondary text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             "
+            :disabled="isLoading"
             @click="setPreset(preset)"
           >
             {{ preset }}
           </button>
         </div>
+        <span v-if="isLoading" class="text-sm text-gray-400 animate-pulse">Cargando...</span>
         <button
           class="ml-auto px-4 py-1.5 rounded-xl text-sm font-medium bg-brand-primary text-white hover:bg-brand-primary/90 transition-colors text-nowrap"
+          :disabled="isLoading"
           @click="generatePdf"
         >
           Exportar PDF

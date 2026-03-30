@@ -3,7 +3,6 @@ import {
   ArrowsRightLeftIcon,
   CheckCircleIcon,
   CreditCardIcon,
-  QrCodeIcon,
   TruckIcon,
   UserIcon,
   XMarkIcon,
@@ -16,8 +15,7 @@ defineProps({
 })
 
 const credentialTypeBadge = {
-  rfid: { icon: CreditCardIcon, label: 'RFID', colorClass: 'bg-blue-50 text-blue-600' },
-  qr: { icon: QrCodeIcon, label: 'QR', colorClass: 'bg-purple-50 text-purple-600' },
+  credential: { icon: CreditCardIcon, label: 'RFID', colorClass: 'bg-blue-50 text-blue-600' },
   lpn: { icon: TruckIcon, label: 'Placa', colorClass: 'bg-orange-50 text-orange-600' },
 }
 

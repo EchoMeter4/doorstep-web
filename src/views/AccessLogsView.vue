@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import Fuse from 'fuse.js'
 import SearchInput from '@/components/SearchInput.vue'
 import FilterDropdown from '@/components/FilterDropdown.vue'
@@ -9,13 +9,28 @@ import AccessLogTable from '@/components/logs/AccessLogTable.vue'
 
 const logsStore = useLogsStore()
 
+const isLoading = computed(() => logsStore.isLoading)
+
+// --- Date range (drives API fetch) ---
+const now = new Date()
+const todayStr = now.toISOString().split('T')[0]
+const thirtyDaysAgoStr = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  .toISOString()
+  .split('T')[0]
+
+const dateFrom = ref(thirtyDaysAgoStr)
+const dateTo = ref(todayStr)
+
+onMounted(() => logsStore.fetchLogs(dateFrom.value, dateTo.value))
+watch([dateFrom, dateTo], ([from, to]) => {
+  if (from && to) logsStore.fetchLogs(from, to)
+})
+
 // --- Filters ---
 const search = ref('')
 const activeZoneFilter = ref('all')
 const activeCredentialTypeFilter = ref('all')
 const activeStatusFilter = ref(null)
-const dateFrom = ref('')
-const dateTo = ref('')
 
 // Derived field for Fuse search
 const logsWithSearchText = computed(() =>
@@ -46,8 +61,7 @@ const zoneFilterOptions = computed(() => {
 const credentialTypeFilterOptions = [
   { key: 'all', label: 'Todos' },
   { key: 'lpn', label: 'Placa' },
-  { key: 'rfid', label: 'RFID' },
-  { key: 'qr', label: 'QR' },
+  { key: 'credential', label: 'Credencial' }
 ]
 
 const authorizedCount = computed(() => logsStore.authorizedCount)
@@ -85,7 +99,7 @@ const filteredLogs = computed(() => {
 </script>
 
 <template>
-  <access-log-table :filtered-logs="filteredLogs">
+  <access-log-table :filtered-logs="filteredLogs" :is-loading="isLoading">
     <template #filters>
       <div class="flex items-center gap-3">
         <search-input v-model="search" placeholder="Buscar registro..." class="flex-1 max-w-78" />
@@ -128,13 +142,18 @@ const filteredLogs = computed(() => {
           v-model="dateFrom"
           type="date"
           class="border border-gray-200 rounded-2xl px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-brand-secondary transition-colors"
+          :disabled="isLoading"
+          :class="isLoading ? 'opacity-50 cursor-not-allowed' : ''"
         />
         <span class="text-sm text-gray-500 shrink-0">Hasta</span>
         <input
           v-model="dateTo"
           type="date"
           class="border border-gray-200 rounded-2xl px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-brand-secondary transition-colors"
+          :disabled="isLoading"
+          :class="isLoading ? 'opacity-50 cursor-not-allowed' : ''"
         />
+        <span v-if="isLoading" class="text-sm text-gray-400 animate-pulse shrink-0">Cargando...</span>
       </div>
     </template>
   </access-log-table>

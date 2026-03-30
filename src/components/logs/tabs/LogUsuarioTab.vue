@@ -73,7 +73,7 @@ const filteredUsers = computed(() => {
         class="flex items-center justify-between px-10 h-14 border-b border-gray-100 last:border-0"
       >
         <span class="text-sm font-medium text-gray-900">{{ user.name }}</span>
-        <overflow-badge-list :items="user.roles.map((r) => r.name)" :max="2" />
+        <overflow-badge-list :items="(user.roles ?? []).map((r) => r.name)" :max="2" />
       </div>
     </template>
     <p v-else class="text-sm text-gray-400 text-center py-8">Ningún usuario encontrado</p>
