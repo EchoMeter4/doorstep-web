@@ -1,6 +1,6 @@
 <script setup>
 defineProps({
-  icon: { type: Object, default: null },
+  icon: { type: Function, default: null },
   label: String,
   colorClass: String,
 })
