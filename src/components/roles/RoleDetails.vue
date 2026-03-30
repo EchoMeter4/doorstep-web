@@ -7,6 +7,7 @@ import {
   UsersIcon,
 } from '@heroicons/vue/24/solid'
 import BaseDetailsPanel from '@/components/BaseDetailsPanel.vue'
+import DeleteButton from '@/components/DeleteButton.vue'
 import PendingChangesBar from '@/components/PendingChangesBar.vue'
 import RoleDetallesTab from '@/components/roles/tabs/RoleDetallesTab.vue'
 import RoleUsuariosTab from '@/components/roles/tabs/RoleUsuariosTab.vue'
@@ -155,14 +156,7 @@ const tabDefs = computed(() => [
     </template>
 
     <template #header-actions>
-      <button
-        v-if="!isNew"
-        class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors text-sm"
-        @click="showDeleteConfirm = true"
-      >
-        <TrashIcon class="size-4 shrink-0" />
-        Eliminar rol
-      </button>
+      <delete-button v-if="!isNew" label="Eliminar rol" @click="showDeleteConfirm = true" />
     </template>
 
     <template #overlay>

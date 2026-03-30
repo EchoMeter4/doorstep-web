@@ -10,6 +10,7 @@ import {
   UsersIcon,
 } from '@heroicons/vue/24/solid'
 import BaseDetailsPanel from '@/components/BaseDetailsPanel.vue'
+import DeleteButton from '@/components/DeleteButton.vue'
 import PendingChangesBar from '@/components/PendingChangesBar.vue'
 import ZoneDetallesTab from '@/components/zones/tabs/ZoneDetallesTab.vue'
 import ZoneRolesTab from '@/components/zones/tabs/ZoneRolesTab.vue'
@@ -193,14 +194,7 @@ const tabDefs = computed(() => [
     </template>
 
     <template #header-actions>
-      <button
-        v-if="!isNew"
-        class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors text-sm"
-        @click="showDeleteConfirm = true"
-      >
-        <TrashIcon class="size-4 shrink-0" />
-        Eliminar zona
-      </button>
+      <delete-button v-if="!isNew" label="Eliminar zona" @click="showDeleteConfirm = true" />
     </template>
 
     <template #overlay>

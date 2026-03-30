@@ -180,7 +180,7 @@ function closeCreateModal() {
             <overflow-badge-list :items="zone.roles" />
           </div>
 
-          <!-- Status pill with dropdown -->
+          <!-- Status pill -->
           <div class="px-6 py-4 w-full">
             <pill-select v-model="zone.enabled" :options="zoneStatusOptions" />
           </div>
