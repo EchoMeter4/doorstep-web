@@ -235,27 +235,29 @@ async function generatePdf() {
           @change="onDateChange"
         />
       </div>
-      <div class="flex gap-2 ml-2">
+      <div class="gap-3 flex flex-1 justify-between items-center">
+        <div class="flex gap-2 ml-2">
+          <button
+            v-for="preset in ['Hoy', '7 días', '30 días', 'Este mes']"
+            :key="preset"
+            class="px-3 py-1.5 rounded-xl text-sm font-medium transition-colors text-nowrap"
+            :class="
+              activePreset === preset
+                ? 'bg-brand-secondary text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            "
+            @click="setPreset(preset)"
+          >
+            {{ preset }}
+          </button>
+        </div>
         <button
-          v-for="preset in ['Hoy', '7 días', '30 días', 'Este mes']"
-          :key="preset"
-          class="px-3 py-1.5 rounded-xl text-sm font-medium transition-colors"
-          :class="
-            activePreset === preset
-              ? 'bg-brand-secondary text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          "
-          @click="setPreset(preset)"
+          class="ml-auto px-4 py-1.5 rounded-xl text-sm font-medium bg-brand-primary text-white hover:bg-brand-primary/90 transition-colors text-nowrap"
+          @click="generatePdf"
         >
-          {{ preset }}
+          Exportar PDF
         </button>
       </div>
-      <button
-        class="ml-auto px-4 py-1.5 rounded-xl text-sm font-medium bg-brand-primary text-white hover:bg-brand-primary/90 transition-colors"
-        @click="generatePdf"
-      >
-        Exportar PDF
-      </button>
     </div>
 
     <!-- Stat cards -->
