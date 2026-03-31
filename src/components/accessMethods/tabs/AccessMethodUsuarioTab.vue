@@ -5,15 +5,15 @@ import { CheckIcon } from '@heroicons/vue/24/solid'
 import SearchInput from '@/components/SearchInput.vue'
 
 const props = defineProps({
-  items: { type: Array, required: true },
+  currentItems: { type: Array, required: true },
 })
 
 const search = ref('')
 
 const filteredItems = computed(() => {
   const clean = search.value.trim()
-  if (clean.length === 0) return props.items
-  const fuse = new Fuse(props.items, { keys: ['name'], threshold: 0.4 })
+  if (clean.length === 0) return props.currentItems
+  const fuse = new Fuse(props.currentItems, { keys: ['name'], threshold: 0.4 })
   return fuse.search(clean).map((r) => r.item)
 })
 
@@ -21,7 +21,7 @@ function selectUser(clicked) {
   if (clicked.selected) {
     clicked.selected = false
   } else {
-    props.items.forEach((u) => (u.selected = false))
+    props.currentItems.forEach((u) => (u.selected = false))
     clicked.selected = true
   }
 }

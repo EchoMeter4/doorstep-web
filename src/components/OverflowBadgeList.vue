@@ -2,12 +2,12 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  items: Array,
+  currentItems: Array,
   max: { type: Number, default: 2 },
 })
 
-const visible = computed(() => props.items.slice(0, props.max))
-const overflow = computed(() => props.items.length - props.max)
+const visible = computed(() => props.currentItems.slice(0, props.max))
+const overflow = computed(() => props.currentItems.length - props.max)
 </script>
 
 <template>

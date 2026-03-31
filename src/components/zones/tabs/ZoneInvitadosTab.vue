@@ -4,15 +4,15 @@ import Fuse from 'fuse.js'
 import SearchInput from '@/components/SearchInput.vue'
 
 const props = defineProps({
-  items: { type: Array, required: true },
+  currentItems: { type: Array, required: true },
 })
 
 const guestSearch = ref('')
 
 const filteredItems = computed(() => {
   const cleanInput = guestSearch.value.trim()
-  if (cleanInput.length === 0) return props.items
-  const fuse = new Fuse(props.items, { keys: ['name'], threshold: 0.4 })
+  if (cleanInput.length === 0) return props.currentItems
+  const fuse = new Fuse(props.currentItems, { keys: ['name'], threshold: 0.4 })
   return fuse.search(cleanInput).map((r) => r.item)
 })
 

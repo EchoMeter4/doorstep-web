@@ -210,14 +210,14 @@ const tabDefs = computed(() => [
     label: 'Usuario',
     icon: UserIcon,
     component: AccessMethodUsuarioTab,
-    props: { items: userItems.value },
+    props: { currentItems: userItems.value },
   },
   {
     key: 'zonas',
     label: 'Zonas',
     icon: ShieldCheckIcon,
     component: AccessMethodZonasTab,
-    props: { items: zoneItems.value },
+    props: { currentItems: zoneItems.value },
   },
   {
     key: 'historial',

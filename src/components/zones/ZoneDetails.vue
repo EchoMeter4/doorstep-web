@@ -175,14 +175,14 @@ const tabDefs = computed(() => [
     label: 'Roles Permitidos',
     icon: ShieldCheckIcon,
     component: ZoneRolesTab,
-    props: { items: roleItems.value },
+    props: { currentItems: roleItems.value },
   },
   {
     key: 'invitados',
     label: 'Invitados',
     icon: UsersIcon,
     component: ZoneInvitadosTab,
-    props: { items: guestItems },
+    props: { currentItems: guestItems },
   },
 ])
 </script>

@@ -11,14 +11,54 @@ defineProps({
 
 <template>
   <div class="px-10 py-8 flex flex-col gap-6">
-    <!-- Name -->
+    <!-- Name fields -->
+    <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Primer nombre</label>
+        <input
+          v-model="localDetails.name"
+          class="border-b border-gray-300 outline-none py-1.5 text-sm focus:border-brand-secondary transition-colors"
+          type="text"
+          placeholder="Primer nombre"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Segundo nombre</label>
+        <input
+          v-model="localDetails.middleName"
+          class="border-b border-gray-300 outline-none py-1.5 text-sm focus:border-brand-secondary transition-colors"
+          type="text"
+          placeholder="Segundo nombre"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Primer apellido</label>
+        <input
+          v-model="localDetails.firstLastName"
+          class="border-b border-gray-300 outline-none py-1.5 text-sm focus:border-brand-secondary transition-colors"
+          type="text"
+          placeholder="Primer apellido"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Segundo apellido</label>
+        <input
+          v-model="localDetails.secondLastName"
+          class="border-b border-gray-300 outline-none py-1.5 text-sm focus:border-brand-secondary transition-colors"
+          type="text"
+          placeholder="Segundo apellido"
+        />
+      </div>
+    </div>
+
+    <!-- Email -->
     <div class="flex flex-col gap-1.5">
-      <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</label>
+      <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Correo electrónico</label>
       <input
-        v-model="localDetails.name"
+        v-model="localDetails.email"
         class="border-b border-gray-300 outline-none py-1.5 text-sm focus:border-brand-secondary transition-colors"
-        type="text"
-        placeholder="Nombre del usuario"
+        type="email"
+        placeholder="correo@ejemplo.com"
       />
     </div>
 

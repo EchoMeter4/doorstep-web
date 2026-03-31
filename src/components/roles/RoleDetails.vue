@@ -137,14 +137,14 @@ const tabDefs = computed(() => [
     label: 'Usuarios',
     icon: UsersIcon,
     component: RoleUsuariosTab,
-    props: { items: userItems.value },
+    props: { currentItems: userItems.value },
   },
   {
     key: 'zonas',
     label: 'Zonas Restringidas',
     icon: ShieldCheckIcon,
     component: RoleZonasTab,
-    props: { items: zoneItems.value },
+    props: { currentItems: zoneItems.value },
   },
 ])
 </script>

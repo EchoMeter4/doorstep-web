@@ -5,7 +5,7 @@ import { PlusIcon } from '@heroicons/vue/24/solid'
 import SearchableToggleList from '@/components/SearchableToggleList.vue'
 
 const props = defineProps({
-  items: { type: Array, required: true },
+  currentItems: { type: Array, required: true },
 })
 
 const newPlate = ref('')
@@ -13,7 +13,7 @@ const newPlate = ref('')
 function addPlate() {
   const trimmed = newPlate.value.trim().toUpperCase()
   if (!trimmed) return
-  props.items.push({
+  props.currentItems.push({
     id: Date.now(),
     name: trimmed,
     enabled: true,
@@ -42,6 +42,6 @@ function addPlate() {
         Agregar
       </button>
     </div>
-    <searchable-toggle-list :items="items" placeholder="Buscar placa..." />
+    <searchable-toggle-list :currentItems="items" placeholder="Buscar placa..." />
   </div>
 </template>

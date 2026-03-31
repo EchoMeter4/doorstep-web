@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
   IdentificationIcon,
   InformationCircleIcon,
@@ -17,6 +17,18 @@ import { useUsersStore } from '@/stores/users'
 const props = defineProps({
   user: { type: Object, required: true },
 })
+
+const currentOriginal = ref(props.user)
+
+function dpUser(){
+  return JSON.parse(JSON.stringify(currentOriginal))
+}
+function resetCurrentUser() {
+  currentUser.value = dpUser()
+}
+
+const originalUser = computed(() => props.user)
+const currentUser = ref(dpUser())
 
 const emit = defineEmits(['delete', 'create', 'close'])
 
@@ -40,83 +52,73 @@ const statusOptions = [
 
 const credentialTypes = ['RFID', 'QR']
 
-// --- Mutable details state (passed to UserDetallesTab, mutated in place) ---
-const localDetails = reactive({
-  name: props.user?.name ?? '',
-  status: props.user?.enabled ?? true,
-  credentialType: props.user?.credential?.type ?? null,
-  credentialNumber: props.user?.credential?.number ?? '',
-})
+watch(() => props.user, resetCurrentUser)
 
-// --- Original values for change tracking and discard ---
-const origName = ref(props.user?.name ?? '')
-const origStatus = ref(props.user?.enabled ?? true)
-const origCredentialType = ref(props.user?.credential?.type ?? null)
-const origCredentialNumber = ref(props.user?.credential?.number ?? '')
+function objectsAreEqual(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b)
+}
 
-// --- Relationship tab state ---
-const roleItems = ref(props.user?.roles?.map((r) => ({ ...r })) ?? [])
-const plateItems = ref(props.user?.plates?.map((p) => ({ ...p })) ?? [])
-
-// Sync when a different user is opened
-watch(
-  () => props.user,
-  (user) => {
-    origName.value = user?.name ?? ''
-    origStatus.value = user?.enabled ?? true
-    origCredentialType.value = user?.credential?.type ?? null
-    origCredentialNumber.value = user?.credential?.number ?? ''
-
-    Object.assign(localDetails, {
-      name: user?.name ?? '',
-      status: user?.enabled ?? true,
-      credentialType: user?.credential?.type ?? null,
-      credentialNumber: user?.credential?.number ?? '',
-    })
-
-    roleItems.value = user?.roles?.map((r) => ({ ...r })) ?? []
-    plateItems.value = user?.plates?.map((p) => ({ ...p })) ?? []
-  },
+const hasPendingChanges = computed(() =>
+  Object.keys(originalUser.value).some(
+    (key) => {
+      const originalValue = originalUser.value[key]
+      const editableValue = currentUser.value[key]
+      
+      // Array fields
+      if (Array.isArray(originalValue) && Array.isArray(editableValue)) {
+        originalValue.sort((a, b) => a.id - b.id)
+        editableValue.sort((a, b) => a.id - b.id)
+        return !objectsAreEqual(originalValue, editableValue)
+      }
+      
+      // Object fields
+      if (typeof originalValue === 'object' && originalValue !== null) {
+        return !objectsAreEqual(originalValue, editableValue)
+      }
+      
+      // Primitive fields
+      return originalValue !== editableValue
+    }
+  ),
 )
 
-// --- Pending changes ---
-const hasPendingChanges = computed(
-  () =>
-    localDetails.name !== origName.value ||
-    localDetails.status !== origStatus.value ||
-    localDetails.credentialType !== origCredentialType.value ||
-    localDetails.credentialNumber !== origCredentialNumber.value ||
-    roleItems.value.some((r) => r.enabled !== r.original) ||
-    plateItems.value.some((p) => p.enabled !== p.original),
-)
-
-function saveChanges() {
+async function saveChanges() {
+  const userValue = currentUser.value
+  
   if (isNew.value) {
-    usersStore.addUser({
-      name: localDetails.name,
-      enabled: localDetails.status,
-      credential: localDetails.credentialType
+    await usersStore.addUser({
+      name: userValue.name,
+      middle_name: userValue.middleName,
+      first_last_name: userValue.firstLastName,
+      second_last_name: userValue.secondLastName,
+      email: userValue.email,
+      enabled: userValue.status,
+      credential: userValue.credentialType
         ? {
             id: Date.now(),
-            number: localDetails.credentialNumber,
-            type: localDetails.credentialType,
+            number: userValue.credentialNumber,
+            type: userValue.credentialType,
           }
         : null,
-      roles: roleItems.value,
-      plates: plateItems.value,
+      roles: userValue.roles.map((r) => r.id),
+      plates: userValue.vehicles.map(v => v.id),
     })
     emit('create')
     return
   }
-  origName.value = localDetails.name
-  origStatus.value = localDetails.status
-  origCredentialType.value = localDetails.credentialType
-  origCredentialNumber.value = localDetails.credentialNumber
-  roleItems.value.forEach((r) => (r.original = r.enabled))
-  plateItems.value.forEach((p) => {
-    p.original = p.enabled
-    delete p.isLocalNew
+
+  await usersStore.updateUser(props.user.id, {
+    name: userValue.name,
+    middle_name: userValue.middleName,
+    first_last_name: userValue.firstLastName,
+    second_last_name: userValue.secondLastName,
+    email: userValue.email,
+    enabled: userValue.status,
+    roles: userValue.roles.map(r => r.id),
+    vehicles: userValue.vehicles.map(v => v.id),
   })
+
+  originalUser.value = JSON.parse(JSON.stringify(currentUser.value))
 }
 
 function discardChanges() {
@@ -124,15 +126,8 @@ function discardChanges() {
     emit('create')
     return
   }
-  Object.assign(localDetails, {
-    name: origName.value,
-    status: origStatus.value,
-    credentialType: origCredentialType.value,
-    credentialNumber: origCredentialNumber.value,
-  })
-  roleItems.value.forEach((r) => (r.enabled = r.original))
-  plateItems.value = plateItems.value.filter((p) => !p.isLocalNew)
-  plateItems.value.forEach((p) => (p.enabled = p.original))
+
+  resetCurrentUser()
 }
 
 // --- Delete ---
@@ -142,6 +137,9 @@ function deleteUser() {
   emit('delete', props.user)
 }
 
+function updateRolesList() {
+}
+
 // --- Tab definitions (computed so roleItems/plateItems changes trigger tabDefs watch in BaseDetailsPanel) ---
 const tabDefs = computed(() => [
   {
@@ -149,21 +147,22 @@ const tabDefs = computed(() => [
     label: 'Detalles',
     icon: InformationCircleIcon,
     component: UserDetallesTab,
-    props: { localDetails, statusOptions, credentialTypes },
+    props: { editableUser: currentUser, statusOptions, credentialTypes },
   },
   {
     key: 'roles',
     label: 'Roles',
     icon: UsersIcon,
     component: UserRolesTab,
-    props: { items: roleItems.value },
+    props: { currentItems: currentUser.value.roles },
+    listeners: {'onInput': updateRolesList}
   },
   {
     key: 'placas',
     label: 'Placas',
     icon: IdentificationIcon,
     component: UserPlacasTab,
-    props: { items: plateItems.value },
+    props: { currentItems: currentUser.value.plates },
   },
 ])
 </script>
@@ -171,7 +170,13 @@ const tabDefs = computed(() => [
 <template>
   <base-details-panel :tab-defs="tabDefs" @close="emit('close')">
     <template #header-title>
-      <span class="font-semibold">{{ isNew ? 'Nuevo Usuario' : user.name }}</span>
+      <span class="font-semibold">{{
+        isNew
+          ? 'Nuevo Usuario'
+          : [user.name, user.middleName, user.firstLastName, user.secondLastName]
+              .filter(Boolean)
+              .join(' ')
+      }}</span>
     </template>
 
     <template #header-actions>

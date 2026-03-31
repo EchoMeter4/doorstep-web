@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Fuse from 'fuse.js'
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import SearchInput from '@/components/SearchInput.vue'
@@ -12,6 +12,10 @@ import UserDetails from '@/components/users/UserDetails.vue'
 import { useUsersStore } from '@/stores/users'
 
 const usersStore = useUsersStore()
+
+const isLoading = computed(() => usersStore.isLoading)
+
+onMounted(() => usersStore.fetchUsers())
 
 const userStatusOptions = [
   {
@@ -34,7 +38,13 @@ const search = ref('')
 const activeStatusFilter = ref(null) // null = all | 'active' | 'inactive'
 const activeRoleFilter = ref('all')
 
-const fuse = new Fuse(usersStore.users, { keys: ['name'], threshold: 0.4 })
+const fuse = computed(
+  () =>
+    new Fuse(usersStore.users, {
+      keys: ['name', 'middleName', 'firstLastName', 'secondLastName', 'email'],
+      threshold: 0.4,
+    }),
+)
 
 const allRoleNames = computed(() => {
   const names = new Set()
@@ -54,7 +64,7 @@ const roleFilterOptions = computed(() => [
 const filteredUsers = computed(() => {
   const cleanSearch = search.value.trim()
   let results =
-    cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : usersStore.users
+    cleanSearch.length > 0 ? fuse.value.search(cleanSearch).map((r) => r.item) : usersStore.users
 
   if (activeStatusFilter.value !== null) {
     results = results.filter((u) => u.enabled === (activeStatusFilter.value === 'active'))
@@ -79,9 +89,8 @@ function closeDetailsModal() {
   selectedUser.value = null
 }
 
-function handleDelete(user) {
-  const index = usersStore.users.findIndex((u) => u.id === user.id)
-  if (index !== -1) usersStore.users.splice(index, 1)
+async function handleDelete(user) {
+  await usersStore.deleteUser(user.id)
   closeDetailsModal()
 }
 
@@ -146,17 +155,19 @@ function closeCreateModal() {
         >
           <!-- User name -->
           <div class="px-6 py-4">
-            <p class="text-sm font-medium text-gray-900">{{ user.name }}</p>
+            <p class="text-sm font-medium text-gray-900">
+              {{ [user.name, user.middleName, user.firstLastName, user.secondLastName].filter(Boolean).join(' ') }}
+            </p>
           </div>
 
           <!-- Roles -->
           <div class="px-6 py-4">
-            <overflow-badge-list :items="user.roles.filter((r) => r.enabled).map((r) => r.name)" />
+            <overflow-badge-list :items="user.roles.map(r => r.name)" />
           </div>
 
           <!-- Plates -->
           <div class="px-6 py-4">
-            <overflow-badge-list :items="user.plates.filter((p) => p.enabled).map((p) => p.name)" />
+            <overflow-badge-list :items="user.vehicles.map(v => v.plateNumber)" />
           </div>
 
           <!-- Credential -->
@@ -174,7 +185,7 @@ function closeCreateModal() {
         </div>
 
         <div v-if="filteredUsers.length === 0" class="px-6 py-12 text-center text-sm text-gray-400">
-          No se encontraron usuarios
+          {{ isLoading ? 'Cargando usuarios...' : 'No se encontraron usuarios' }}
         </div>
       </template>
     </base-table>
