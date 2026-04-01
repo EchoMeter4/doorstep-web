@@ -66,6 +66,10 @@ function toggleItem(item) {
 
         <toggle-switch :model-value="isSelected(item)" @update:model-value="toggleItem(item)" />
       </div>
+      
+      <div
+        class="relative flex items-center justify-between px-10 h-24"
+      />
     </div>
   </div>
 </template>

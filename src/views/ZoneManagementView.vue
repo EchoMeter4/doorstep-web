@@ -20,7 +20,6 @@ onMounted(() => zonesStore.fetchZones())
 const typeLabels = {
   pedestrian: 'Peatonal',
   vehicular: 'Vehicular',
-  mixed: 'Mixta',
 }
 
 const typeClasses = {
@@ -61,7 +60,6 @@ const typeFilters = [
   { key: 'all', label: 'Todos' },
   { key: 'pedestrian', label: 'Peatonal' },
   { key: 'vehicular', label: 'Vehicular' },
-  { key: 'mixed', label: 'Mixta' },
 ]
 
 const fuse = computed(() => new Fuse(zonesStore.zones, { keys: ['name', 'description'], threshold: 0.4 }))

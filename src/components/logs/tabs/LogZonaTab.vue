@@ -6,7 +6,7 @@ defineProps({
   log: { type: Object, required: true },
 })
 
-const typeLabels = { pedestrian: 'Peatonal', vehicular: 'Vehicular', mixed: 'Mixta' }
+const typeLabels = { pedestrian: 'Peatonal', vehicular: 'Vehicular'}
 const typeClasses = {
   pedestrian: 'bg-green-100 text-green-700',
   vehicular: 'bg-orange-100 text-orange-700',

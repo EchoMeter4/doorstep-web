@@ -85,22 +85,25 @@ async function fetchRelatedData() {
 onMounted(fetchRelatedData)
 
 // --- Pending changes ---
-function normalizeUserForComparison(user) {
-  return {
-    ...user,
-    middleName: user.middleName?.trim() || null,
-    secondLastName: user.secondLastName?.trim() || null,
-    roles: [...user.roles].map((r) => r.id).sort((a, b) => a - b),
-    vehicles: [...user.vehicles].map((v) => v.id).sort((a, b) => a - b),
-    // isLocalNew credentials have id=null but are still a pending change
-    credential: user.credential ? (user.credential.isLocalNew ? user.credential.credentialCode : user.credential.id) : null,
-  }
-}
-
 const hasPendingChanges = computed(() => {
+  const orig = props.user
+  const curr = currentUser.value
+  const origCredKey = orig.credential?.id ?? null
+  const currCredKey = curr.credential
+    ? (curr.credential.isLocalNew ? `new:${curr.credential.credentialCode}` : curr.credential.id)
+    : null
   return (
-    JSON.stringify(normalizeUserForComparison(props.user)) !==
-    JSON.stringify(normalizeUserForComparison(currentUser.value))
+    curr.name !== orig.name ||
+    (curr.middleName?.trim() || null) !== (orig.middleName?.trim() || null) ||
+    curr.firstLastName !== orig.firstLastName ||
+    (curr.secondLastName?.trim() || null) !== (orig.secondLastName?.trim() || null) ||
+    curr.email !== orig.email ||
+    curr.enabled !== orig.enabled ||
+    JSON.stringify([...curr.roles].map((r) => r.id).sort((a, b) => a - b)) !==
+      JSON.stringify([...orig.roles].map((r) => r.id).sort((a, b) => a - b)) ||
+    JSON.stringify([...curr.vehicles].map((v) => v.id).sort((a, b) => a - b)) !==
+      JSON.stringify([...orig.vehicles].map((v) => v.id).sort((a, b) => a - b)) ||
+    currCredKey !== origCredKey
   )
 })
 
@@ -121,18 +124,27 @@ async function saveChanges() {
       roles: userValue.roles.map((r) => r.id),
       vehicles: userValue.vehicles.map((v) => v.id),
     })
-    // Link or create credential after user is created
-    if (newCred) {
-      const userId = created?.id ?? null
+    if (newCred && created?.id) {
       if (newCred.isLocalNew) {
-        await Credentials.create({
+        const credRes = await Credentials.create({
           credential_code: newCred.credentialCode,
-          user_id: userId,
+          user_id: created.id,
           is_active: true,
           issued_at: null,
         })
+        usersStore.patchUserCredential(created.id, credRes.data.credential)
       } else {
-        await Credentials.update(newCred.id, { user_id: userId })
+        const credRes = await Credentials.update(newCred.id, { user_id: created.id })
+        usersStore.patchUserCredential(
+          created.id,
+          credRes.data?.credential ?? {
+            id: newCred.id,
+            userId: created.id,
+            credentialCode: newCred.credentialCode,
+            isActive: newCred.isActive ?? true,
+            issuedAt: newCred.issuedAt ?? null,
+          },
+        )
       }
     }
     emit('create')
@@ -150,27 +162,38 @@ async function saveChanges() {
     vehicles: userValue.vehicles.map((v) => v.id),
   })
 
-  // Handle credential changes independently
   const credentialChanged = (oldCred?.id ?? null) !== (newCred?.id ?? null) || newCred?.isLocalNew
   if (credentialChanged) {
-    // Unlink old credential if there was one
     if (oldCred && (!newCred || oldCred.id !== newCred?.id)) {
       await Credentials.update(oldCred.id, { user_id: null })
     }
     if (newCred) {
+      let patchedCredential
       if (newCred.isLocalNew) {
-        await Credentials.create({
+        const credRes = await Credentials.create({
           credential_code: newCred.credentialCode,
           user_id: props.user.id,
           is_active: true,
           issued_at: null,
         })
+        patchedCredential = credRes.data.credential
       } else {
-        await Credentials.update(newCred.id, { user_id: props.user.id })
+        const credRes = await Credentials.update(newCred.id, { user_id: props.user.id })
+        // Use backend response if available, otherwise construct from known data
+        patchedCredential = credRes.data?.credential ?? {
+          id: newCred.id,
+          userId: props.user.id,
+          credentialCode: newCred.credentialCode,
+          isActive: newCred.isActive ?? true,
+          issuedAt: newCred.issuedAt ?? null,
+        }
       }
+      usersStore.patchUserCredential(props.user.id, patchedCredential)
+    } else {
+      usersStore.patchUserCredential(props.user.id, null)
     }
-    // Refresh user to get updated credential from backend
-    await usersStore.fetchUsers()
+    // Sync currentUser to the now-patched props.user so hasPendingChanges clears
+    currentUser.value = dpUser()
   }
 }
 

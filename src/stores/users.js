@@ -69,6 +69,11 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
+  function patchUserCredential(userId, credential) {
+    const idx = users.value.findIndex((u) => u.id === userId)
+    if (idx !== -1) users.value[idx].credential = credential
+  }
+
   return {
     users,
     isLoading,
@@ -79,5 +84,6 @@ export const useUsersStore = defineStore('users', () => {
     fetchUsers,
     updateUser,
     deleteUser,
+    patchUserCredential,
   }
 })
