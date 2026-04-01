@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Fuse from 'fuse.js'
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import SearchInput from '@/components/SearchInput.vue'
@@ -28,15 +28,17 @@ const visitorStatusOptions = [
   },
 ]
 
+onMounted(() => visitorsStore.fetchVisitors())
+
 const search = ref('')
 const activeStatusFilter = ref(null)
 
-const fuse = new Fuse(visitorsStore.visitors, { keys: ['name', 'company'], threshold: 0.4 })
+const fuse = computed(() => new Fuse(visitorsStore.visitors, { keys: ['name', 'company'], threshold: 0.4 }))
 
 const filteredVisitors = computed(() => {
   const cleanSearch = search.value.trim()
   let results =
-    cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : visitorsStore.visitors
+    cleanSearch.length > 0 ? fuse.value.search(cleanSearch).map((r) => r.item) : visitorsStore.visitors
 
   if (activeStatusFilter.value !== null) {
     results = results.filter((v) => v.enabled === (activeStatusFilter.value === 'active'))
@@ -55,9 +57,8 @@ function closeDetailsModal() {
   selectedVisitor.value = null
 }
 
-function handleDelete(visitor) {
-  const index = visitorsStore.visitors.findIndex((v) => v.id === visitor.id)
-  if (index !== -1) visitorsStore.visitors.splice(index, 1)
+async function handleDelete(visitor) {
+  await visitorsStore.deleteVisitor(visitor.id)
   closeDetailsModal()
 }
 

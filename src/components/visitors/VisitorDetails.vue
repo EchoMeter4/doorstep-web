@@ -1,12 +1,13 @@
 <script setup>
 /* eslint-disable vue/no-mutating-props */
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { InformationCircleIcon, TicketIcon, TrashIcon } from '@heroicons/vue/24/solid'
 import BaseDetailsPanel from '@/components/BaseDetailsPanel.vue'
 import DeleteButton from '@/components/DeleteButton.vue'
 import PendingChangesBar from '@/components/PendingChangesBar.vue'
 import VisitorDetailsTab from '@/components/visitors/tabs/VisitorDetailsTab.vue'
 import VisitorPassesTab from '@/components/visitors/tabs/VisitorPassesTab.vue'
+import { usePassesStore } from '@/stores/passes.js'
 import { useVisitorsStore } from '@/stores/visitors.js'
 import { useZonesStore } from '@/stores/zones.js'
 
@@ -18,6 +19,7 @@ const emit = defineEmits(['delete', 'create', 'close'])
 
 const visitorsStore = useVisitorsStore()
 const zonesStore = useZonesStore()
+const passesStore = usePassesStore()
 
 const isNew = computed(() => props.visitor.id === null)
 
@@ -61,6 +63,11 @@ const zoneOptions = computed(() =>
   zonesStore.zones.filter((z) => z.enabled).map((z) => ({ id: z.id, name: z.name })),
 )
 
+onMounted(() => {
+  if (!zonesStore.zones.length) zonesStore.fetchZones()
+  if (!isNew.value) passesStore.fetchPasses(props.visitor.id)
+})
+
 // Sync when a different visitor is opened
 watch(
   () => props.visitor,
@@ -92,46 +99,50 @@ const hasPendingChanges = computed(
     localDetails.phone !== origPhone.value ||
     localDetails.company !== origCompany.value ||
     localDetails.status !== origStatus.value ||
-    JSON.stringify(passItems.value) !== origPassesSnapshot.value,
+    // For new visitors, passes are buffered locally until creation
+    (isNew.value && JSON.stringify(passItems.value) !== origPassesSnapshot.value),
 )
 
 // --- Save / Discard ---
-function saveChanges() {
+async function saveChanges() {
   if (isNew.value) {
-    visitorsStore.addVisitor({
+    await visitorsStore.addVisitor({
       name: localDetails.name,
       email: localDetails.email,
       phone: localDetails.phone,
       company: localDetails.company,
       enabled: localDetails.status,
-      passes: passItems.value,
+      // eslint-disable-next-line no-unused-vars
+      passes: passItems.value.map(({ isLocalNew: _ignored, ...pass }) => ({
+        validFrom: pass.validFrom,
+        validUntil: pass.validUntil,
+        zone_ids: pass.zones.map((z) => z.id),
+      })),
     })
     emit('create')
     return
   }
 
-  // Write back to the store object
-  props.visitor.name = localDetails.name
-  props.visitor.email = localDetails.email
-  props.visitor.phone = localDetails.phone
-  props.visitor.company = localDetails.company
-  props.visitor.enabled = localDetails.status
-  // eslint-disable-next-line no-unused-vars
-  props.visitor.passes = passItems.value.map(({ isLocalNew: _ignored, ...pass }) => pass)
+  await visitorsStore.updateVisitor(props.visitor.id, {
+    name: localDetails.name,
+    email: localDetails.email,
+    phone: localDetails.phone,
+    company: localDetails.company,
+    enabled: localDetails.status,
+  })
 
-  // Advance orig refs
-  origName.value = localDetails.name
-  origEmail.value = localDetails.email
-  origPhone.value = localDetails.phone
-  origCompany.value = localDetails.company
-  origStatus.value = localDetails.status
-  origPassesSnapshot.value = JSON.stringify(props.visitor.passes)
-  passItems.value = JSON.parse(JSON.stringify(props.visitor.passes))
+  // Advance orig refs from the store object (updated in-place by Object.assign in store)
+  // Passes are not included here — they are persisted immediately via the passes store
+  origName.value = props.visitor.name
+  origEmail.value = props.visitor.email
+  origPhone.value = props.visitor.phone
+  origCompany.value = props.visitor.company
+  origStatus.value = props.visitor.enabled
 }
 
 function discardChanges() {
   if (isNew.value) {
-    emit('create')
+    emit('close')
     return
   }
   Object.assign(localDetails, {
@@ -166,7 +177,12 @@ const tabDefs = computed(() => [
     label: 'Pases',
     icon: TicketIcon,
     component: VisitorPassesTab,
-    props: { passes: passItems.value, zoneOptions: zoneOptions.value },
+    props: {
+      // New visitors use a local buffer; existing visitors use the live store array
+      passes: isNew.value ? passItems.value : props.visitor.passes,
+      zoneOptions: zoneOptions.value,
+      visitorId: props.visitor.id,
+    },
   },
 ])
 </script>

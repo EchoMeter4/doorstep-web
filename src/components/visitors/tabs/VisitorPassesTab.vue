@@ -9,24 +9,28 @@ import {
   PlusIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/solid'
+import { usePassesStore } from '@/stores/passes.js'
 
 const props = defineProps({
   passes: { type: Array, required: true },
   zoneOptions: { type: Array, required: true },
+  visitorId: { type: Number, default: null },
 })
+
+const passesStore = usePassesStore()
 
 const showAddForm = ref(false)
 const editingPassId = ref(null)
 
 const draftForm = reactive({
-  startsAt: '',
-  endsAt: '',
+  validFrom: '',
+  validUntil: '',
   selectedZoneIds: [],
 })
 
 function resetDraft() {
-  draftForm.startsAt = ''
-  draftForm.endsAt = ''
+  draftForm.validFrom = ''
+  draftForm.validUntil = ''
   draftForm.selectedZoneIds = []
 }
 
@@ -37,8 +41,8 @@ function openAddForm() {
 }
 
 function openEditForm(pass) {
-  draftForm.startsAt = pass.startsAt ? pass.startsAt.slice(0, 16) : ''
-  draftForm.endsAt = pass.endsAt ? pass.endsAt.slice(0, 16) : ''
+  draftForm.validFrom = pass.validFrom ? pass.validFrom.slice(0, 16) : ''
+  draftForm.validUntil = pass.validUntil ? pass.validUntil.slice(0, 16) : ''
   draftForm.selectedZoneIds = pass.zones.map((z) => z.id)
   editingPassId.value = pass.id
   showAddForm.value = false
@@ -65,29 +69,49 @@ function resolveZones() {
     .map((z) => ({ id: z.id, name: z.name }))
 }
 
-function confirmAdd() {
-  props.passes.push({
-    id: Date.now(),
-    zones: resolveZones(),
-    startsAt: draftForm.startsAt,
-    endsAt: draftForm.endsAt,
-    isLocalNew: true,
-  })
+async function confirmAdd() {
+  if (props.visitorId) {
+    await passesStore.createPass(props.visitorId, {
+      valid_from: draftForm.validFrom,
+      valid_until: draftForm.validUntil,
+      zone_ids: draftForm.selectedZoneIds,
+    })
+  } else {
+    props.passes.push({
+      id: Date.now(),
+      zones: resolveZones(),
+      validFrom: draftForm.validFrom,
+      validUntil: draftForm.validUntil,
+      isLocalNew: true,
+    })
+  }
   cancelForm()
 }
 
-function confirmEdit() {
-  const pass = props.passes.find((p) => p.id === editingPassId.value)
-  if (!pass) return
-  pass.zones = resolveZones()
-  pass.startsAt = draftForm.startsAt
-  pass.endsAt = draftForm.endsAt
+async function confirmEdit() {
+  if (props.visitorId) {
+    await passesStore.updatePass(props.visitorId, editingPassId.value, {
+      valid_from: draftForm.validFrom,
+      valid_until: draftForm.validUntil,
+      zone_ids: draftForm.selectedZoneIds,
+    })
+  } else {
+    const pass = props.passes.find((p) => p.id === editingPassId.value)
+    if (!pass) return
+    pass.zones = resolveZones()
+    pass.validFrom = draftForm.validFrom
+    pass.validUntil = draftForm.validUntil
+  }
   cancelForm()
 }
 
-function deletePass(id) {
-  const index = props.passes.findIndex((p) => p.id === id)
-  if (index !== -1) props.passes.splice(index, 1)
+async function deletePass(id) {
+  if (props.visitorId) {
+    await passesStore.deletePass(props.visitorId, id)
+  } else {
+    const index = props.passes.findIndex((p) => p.id === id)
+    if (index !== -1) props.passes.splice(index, 1)
+  }
 }
 
 function formatDate(iso) {
@@ -140,7 +164,7 @@ function formatDate(iso) {
           <div class="flex flex-col gap-1 flex-1">
             <label class="text-xs text-gray-500">Inicio</label>
             <input
-              v-model="draftForm.startsAt"
+              v-model="draftForm.validFrom"
               type="datetime-local"
               class="border-b border-gray-300 outline-none py-1 text-sm focus:border-brand-secondary transition-colors bg-transparent"
             />
@@ -148,7 +172,7 @@ function formatDate(iso) {
           <div class="flex flex-col gap-1 flex-1">
             <label class="text-xs text-gray-500">Fin</label>
             <input
-              v-model="draftForm.endsAt"
+              v-model="draftForm.validUntil"
               type="datetime-local"
               class="border-b border-gray-300 outline-none py-1 text-sm focus:border-brand-secondary transition-colors bg-transparent"
             />
@@ -200,7 +224,7 @@ function formatDate(iso) {
             <div class="flex flex-col gap-1 flex-1">
               <label class="text-xs text-gray-500">Inicio</label>
               <input
-                v-model="draftForm.startsAt"
+                v-model="draftForm.validFrom"
                 type="datetime-local"
                 class="border-b border-gray-300 outline-none py-1 text-sm focus:border-brand-secondary transition-colors bg-transparent"
               />
@@ -208,7 +232,7 @@ function formatDate(iso) {
             <div class="flex flex-col gap-1 flex-1">
               <label class="text-xs text-gray-500">Fin</label>
               <input
-                v-model="draftForm.endsAt"
+                v-model="draftForm.validUntil"
                 type="datetime-local"
                 class="border-b border-gray-300 outline-none py-1 text-sm focus:border-brand-secondary transition-colors bg-transparent"
               />
@@ -273,9 +297,9 @@ function formatDate(iso) {
           <!-- Date range -->
           <div class="flex items-center gap-2 text-xs text-gray-600">
             <calendar-days-icon class="size-3.5 text-gray-400 shrink-0" />
-            <span>{{ formatDate(pass.startsAt) }}</span>
+            <span>{{ formatDate(pass.validFrom) }}</span>
             <arrow-right-icon class="size-3 text-gray-400 shrink-0" />
-            <span>{{ formatDate(pass.endsAt) }}</span>
+            <span>{{ formatDate(pass.validUntil) }}</span>
           </div>
 
           <!-- Zone pills -->
@@ -287,7 +311,7 @@ function formatDate(iso) {
             >
               {{ zone.name }}
             </span>
-            <span v-if="pass.zones.length === 0" class="text-xs text-gray-400 italic">
+            <span v-if="(pass.zones ?? []).length === 0" class="text-xs text-gray-400 italic">
               Sin zonas asignadas
             </span>
           </div>
