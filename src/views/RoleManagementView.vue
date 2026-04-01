@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Fuse from 'fuse.js'
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import SearchInput from '@/components/SearchInput.vue'
@@ -12,6 +12,8 @@ import RoleDetails from '@/components/roles/RoleDetails.vue'
 import { useRolesStore } from '@/stores/roles'
 
 const rolesStore = useRolesStore()
+
+onMounted(() => rolesStore.fetchRoles())
 
 const roleStatusOptions = [
   {
@@ -35,7 +37,9 @@ const activeStatusFilter = ref(null) // null = all | 'active' | 'inactive'
 const activeUserFilter = ref('all')
 const activeZoneFilter = ref('all')
 
-const fuse = new Fuse(rolesStore.roles, { keys: ['name', 'description'], threshold: 0.4 })
+const fuse = computed(
+  () => new Fuse(rolesStore.roles, { keys: ['name', 'description'], threshold: 0.4 }),
+)
 
 const allUsers = computed(() => {
   const users = new Set()
@@ -45,7 +49,7 @@ const allUsers = computed(() => {
 
 const allZones = computed(() => {
   const zones = new Set()
-  rolesStore.roles.forEach((r) => r.restrictedZones.forEach((z) => zones.add(z.name)))
+  rolesStore.roles.forEach((r) => r.zones.forEach((z) => zones.add(z.name)))
   return Array.from(zones).sort()
 })
 
@@ -62,7 +66,7 @@ const zoneFilterOptions = computed(() => [
 const filteredRoles = computed(() => {
   const cleanSearch = search.value.trim()
   let results =
-    cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : rolesStore.roles
+    cleanSearch.length > 0 ? fuse.value.search(cleanSearch).map((r) => r.item) : rolesStore.roles
 
   if (activeStatusFilter.value !== null) {
     results = results.filter((r) => r.enabled === (activeStatusFilter.value === 'active'))
@@ -73,9 +77,7 @@ const filteredRoles = computed(() => {
   }
 
   if (activeZoneFilter.value !== 'all') {
-    results = results.filter((r) =>
-      r.restrictedZones.some((z) => z.name === activeZoneFilter.value),
-    )
+    results = results.filter((r) => r.zones.some((z) => z.name === activeZoneFilter.value))
   }
 
   return results
@@ -91,9 +93,8 @@ function closeDetailsModal() {
   selectedRole.value = null
 }
 
-function handleDelete(role) {
-  const index = rolesStore.roles.findIndex((r) => r.id === role.id)
-  if (index !== -1) rolesStore.roles.splice(index, 1)
+async function handleDelete(role) {
+  await rolesStore.deleteRole(role.id)
   closeDetailsModal()
 }
 
@@ -102,7 +103,6 @@ function openCreateModal() {
   isCreating.value = true
 }
 function closeCreateModal() {
-  console.log('closing the modal allegedly')
   isCreating.value = false
 }
 </script>
@@ -175,7 +175,7 @@ function closeCreateModal() {
 
           <!-- Restricted zones -->
           <div class="px-6 py-4">
-            <overflow-badge-list :items="role.restrictedZones.map((z) => z.name)" />
+            <overflow-badge-list :items="role.zones.map((z) => z.name)" />
           </div>
 
           <!-- Status pill -->

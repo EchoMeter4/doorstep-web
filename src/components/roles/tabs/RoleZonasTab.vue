@@ -1,20 +1,13 @@
 <script setup>
-/* eslint-disable vue/no-mutating-props */
-import { computed } from 'vue'
 import SearchableToggleList from '@/components/SearchableToggleList.vue'
 
-const props = defineProps({
-  currentItems: { type: Array, required: true },
+defineProps({
+  allItems:      { type: Array, required: true },
+  selectedItems: { type: Array, required: true },
+  originalItems: { type: Array, required: true },
 })
 
-const allItems      = computed(() => props.currentItems)
-const selectedItems = computed(() => props.currentItems.filter((i) => i.enabled))
-const originalItems = computed(() => props.currentItems.filter((i) => i.original))
-
-function handleChange(newSelected) {
-  const newIds = new Set(newSelected.map((i) => i.id))
-  props.currentItems.forEach((item) => { item.enabled = newIds.has(item.id) })
-}
+const emit = defineEmits(['change'])
 </script>
 
 <template>
@@ -23,6 +16,6 @@ function handleChange(newSelected) {
     :selected-items="selectedItems"
     :original-items="originalItems"
     placeholder="Buscar zonas..."
-    @change="handleChange"
+    @change="emit('change', $event)"
   />
 </template>

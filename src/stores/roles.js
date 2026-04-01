@@ -1,136 +1,62 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import Roles from '@/services/roles.js'
 
 export const useRolesStore = defineStore('roles', () => {
-  const roles = ref([
-    {
-      id: 1,
-      name: 'Administrador',
-      description: 'Acceso total al sistema',
-      enabled: true,
-      users: [
-        { id: 1, name: 'Juan García', enabled: true, original: true },
-        { id: 2, name: 'María López', enabled: true, original: true },
-        { id: 7, name: 'Sofia Mendoza', enabled: true, original: true },
-        { id: 8, name: 'Roberto Díaz', enabled: true, original: true },
-      ],
-      restrictedZones: [
-        { id: 6, name: 'Sala de servidores', enabled: false, original: false },
-        { id: 7, name: 'Bodega 2', enabled: false, original: false },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Empleado',
-      description: 'Acceso a áreas comunes de trabajo',
-      enabled: true,
-      users: [
-        { id: 3, name: 'Carlos Pérez', enabled: true, original: true },
-        { id: 4, name: 'Ana Torres', enabled: true, original: true },
-        { id: 5, name: 'Luis Ramírez', enabled: true, original: true },
-        { id: 9, name: 'Elena Vásquez', enabled: true, original: true },
-        { id: 10, name: 'Miguel Herrera', enabled: true, original: true },
-      ],
-      restrictedZones: [
-        { id: 6, name: 'Sala de servidores', enabled: true, original: true },
-        { id: 1, name: 'Bodega 1', enabled: true, original: true },
-        { id: 8, name: 'Estacionamiento Norte', enabled: true, original: true },
-      ],
-    },
-    {
-      id: 3,
-      name: 'Visitante',
-      description: 'Acceso temporal a zonas públicas',
-      enabled: true,
-      users: [
-        { id: 6, name: 'Pedro Sánchez', enabled: true, original: true },
-        { id: 11, name: 'Laura Castillo', enabled: true, original: true },
-      ],
-      restrictedZones: [
-        { id: 6, name: 'Sala de servidores', enabled: true, original: true },
-        { id: 1, name: 'Bodega 1', enabled: true, original: true },
-        { id: 2, name: 'Bodega 2', enabled: true, original: true },
-        { id: 3, name: 'Edificio B', enabled: true, original: true },
-        { id: 4, name: 'Edificio C', enabled: true, original: true },
-      ],
-    },
-    {
-      id: 4,
-      name: 'Directivo',
-      description: 'Acceso a áreas ejecutivas y administrativas',
-      enabled: false,
-      users: [
-        { id: 1, name: 'Juan García', enabled: true, original: true },
-        { id: 2, name: 'María López', enabled: true, original: true },
-        { id: 7, name: 'Sofia Mendoza', enabled: true, original: true },
-      ],
-      restrictedZones: [{ id: 9, name: 'Estacionamiento Sur', enabled: false, original: false }],
-    },
-    {
-      id: 5,
-      name: 'Auxiliar',
-      description: 'Acceso limitado a áreas de soporte',
-      enabled: true,
-      users: [
-        { id: 5, name: 'Luis Ramírez', enabled: true, original: true },
-        { id: 9, name: 'Elena Vásquez', enabled: true, original: true },
-        { id: 10, name: 'Miguel Herrera', enabled: true, original: true },
-        { id: 12, name: 'Fernando Ruiz', enabled: true, original: true },
-      ],
-      restrictedZones: [
-        { id: 6, name: 'Sala de servidores', enabled: true, original: true },
-        { id: 3, name: 'Edificio C', enabled: true, original: true },
-        { id: 4, name: 'Edificio A', enabled: true, original: true },
-      ],
-    },
-    {
-      id: 6,
-      name: 'Seguridad',
-      description: 'Acceso a todas las áreas del recinto',
-      enabled: true,
-      users: [
-        { id: 13, name: 'Andrés Morales', enabled: true, original: true },
-        { id: 14, name: 'Patricia Núñez', enabled: true, original: true },
-        { id: 15, name: 'Diego Vargas', enabled: true, original: true },
-        { id: 16, name: 'Carmen Flores', enabled: true, original: true },
-        { id: 17, name: 'Héctor Ríos', enabled: true, original: true },
-      ],
-      restrictedZones: [],
-    },
-    {
-      id: 7,
-      name: 'Contratista',
-      description: 'Acceso temporal para personal externo',
-      enabled: true,
-      users: [
-        { id: 18, name: 'Marco Ibáñez', enabled: true, original: true },
-        { id: 19, name: 'Valeria Cruz', enabled: true, original: true },
-        { id: 20, name: 'Jorge Medina', enabled: true, original: true },
-      ],
-      restrictedZones: [
-        { id: 6, name: 'Sala de servidores', enabled: true, original: true },
-        { id: 1, name: 'Bodega 1', enabled: true, original: true },
-        { id: 2, name: 'Bodega 2', enabled: true, original: true },
-        { id: 3, name: 'Edificio A', enabled: true, original: true },
-        { id: 4, name: 'Edificio B', enabled: true, original: true },
-        { id: 5, name: 'Edificio C', enabled: true, original: true },
-        { id: 8, name: 'Estacionamiento Norte', enabled: true, original: true },
-        { id: 9, name: 'Estacionamiento Sur', enabled: true, original: true },
-      ],
-    },
-  ])
+  const roles = ref([])
+  const isLoading = ref(false)
 
   const activeCount = computed(() => roles.value.filter((r) => r.enabled).length)
   const inactiveCount = computed(() => roles.value.filter((r) => !r.enabled).length)
 
+  async function fetchRoles() {
+    isLoading.value = true
+    try {
+      const response = await Roles.getAll()
+      roles.value = response.data.roles
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function addRole(data) {
+    isLoading.value = true
+    try {
+      const res = await Roles.create(data)
+      roles.value.push(res.data.role)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function updateRole(id, payload) {
+    isLoading.value = true
+    try {
+      const res = await Roles.update(id, payload)
+      const idx = roles.value.findIndex((r) => r.id === id)
+      if (idx !== -1) {
+        // Mutate in place to preserve the reference held by any open detail panel
+        Object.assign(roles.value[idx], res.data.role)
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function deleteRole(id) {
+    isLoading.value = true
+    try {
+      await Roles.remove(id)
+      const idx = roles.value.findIndex((r) => r.id === id)
+      if (idx !== -1) roles.value.splice(idx, 1)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   function createEmpty() {
-    return { id: null, name: '', description: '', enabled: true, users: [], restrictedZones: [] }
+    return { id: null, name: '', description: '', enabled: true, users: [], zones: [] }
   }
 
-  function addRole(data) {
-    const id = Math.max(0, ...roles.value.map((r) => r.id)) + 1
-    roles.value.push({ id, ...data })
-  }
-
-  return { roles, activeCount, inactiveCount, createEmpty, addRole }
+  return { roles, isLoading, activeCount, inactiveCount, fetchRoles, addRole, updateRole, deleteRole, createEmpty }
 })

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   InformationCircleIcon,
   ShieldCheckIcon,
@@ -13,93 +13,94 @@ import RoleDetallesTab from '@/components/roles/tabs/RoleDetallesTab.vue'
 import RoleUsuariosTab from '@/components/roles/tabs/RoleUsuariosTab.vue'
 import RoleZonasTab from '@/components/roles/tabs/RoleZonasTab.vue'
 import { useRolesStore } from '@/stores/roles'
+import Users from '@/services/users.js'
+import Zones from '@/services/zones.js'
 
 const props = defineProps({
   role: { type: Object, required: true },
 })
 
-const emit = defineEmits(['delete', 'create', 'close'])
+// --- Deep-copy helper ---
+function dpRole() {
+  return JSON.parse(JSON.stringify(props.role))
+}
 
+// --- State ---
+const currentRole = ref(dpRole())
+const originalRole = computed(() => props.role)
+
+const allUsers = ref([])
+const allZones = ref([])
+
+const emit = defineEmits(['delete', 'create', 'close'])
 const rolesStore = useRolesStore()
 const isNew = computed(() => props.role.id === null)
 
 const statusOptions = [
-  {
-    value: true,
-    label: 'Activo',
-    pillClass: 'bg-green-100 text-green-700',
-    ringClass: 'ring-green-600',
-  },
-  {
-    value: false,
-    label: 'Inactivo',
-    pillClass: 'bg-gray-100 text-gray-500',
-    ringClass: 'ring-gray-400',
-  },
+  { value: true,  label: 'Activo',   pillClass: 'bg-green-100 text-green-700', ringClass: 'ring-green-600' },
+  { value: false, label: 'Inactivo', pillClass: 'bg-gray-100 text-gray-500',   ringClass: 'ring-gray-400' },
 ]
 
-// --- Mutable details state ---
-const localDetails = reactive({
-  name: props.role?.name ?? '',
-  description: props.role?.description ?? '',
-  status: props.role?.enabled ?? true,
+// --- Sync when a different role is opened ---
+watch(() => props.role, () => {
+  currentRole.value = dpRole()
 })
 
-// --- Original values for change tracking and discard ---
-const origName = ref(props.role?.name ?? '')
-const origDescription = ref(props.role?.description ?? '')
-const origStatus = ref(props.role?.enabled ?? true)
+// --- Fetch full reference lists when the panel opens ---
+async function fetchRelatedData() {
+  const [usersRes, zonesRes] = await Promise.all([
+    Users.getAll(),
+    Zones.getAll(),
+  ])
+  allUsers.value = usersRes.data.users.map((u) => ({ id: u.id, name: u.name }))
+  allZones.value = zonesRes.data.zones.map((z) => ({ id: z.id, name: z.name }))
+}
 
-// --- Relationship tab state ---
-const userItems = ref([...(props.role?.users ?? [])])
-const zoneItems = ref([...(props.role?.restrictedZones ?? [])])
-
-// Sync when a different role is opened
-watch(
-  () => props.role,
-  (role) => {
-    origName.value = role?.name ?? ''
-    origDescription.value = role?.description ?? ''
-    origStatus.value = role?.enabled ?? true
-
-    Object.assign(localDetails, {
-      name: role?.name ?? '',
-      description: role?.description ?? '',
-      status: role?.enabled ?? true,
-    })
-
-    userItems.value = [...(role?.users ?? [])]
-    zoneItems.value = [...(role?.restrictedZones ?? [])]
-  },
-)
+onMounted(fetchRelatedData)
 
 // --- Pending changes ---
-const hasPendingChanges = computed(
-  () =>
-    localDetails.name !== origName.value ||
-    localDetails.description !== origDescription.value ||
-    localDetails.status !== origStatus.value ||
-    userItems.value.some((u) => u.enabled !== u.original) ||
-    zoneItems.value.some((z) => z.enabled !== z.original),
+const hasPendingChanges = computed(() =>
+  Object.keys(originalRole.value).some((key) => {
+    const originalValue = originalRole.value[key]
+    const editableValue = currentRole.value[key]
+
+    if (Array.isArray(originalValue) && Array.isArray(editableValue)) {
+      const origIds = JSON.stringify([...originalValue].map((i) => i.id).sort((a, b) => a - b))
+      const editIds = JSON.stringify([...editableValue].map((i) => i.id).sort((a, b) => a - b))
+      return origIds !== editIds
+    }
+
+    if (typeof originalValue === 'object' && originalValue !== null) {
+      return JSON.stringify(originalValue) !== JSON.stringify(editableValue)
+    }
+
+    return originalValue !== editableValue
+  }),
 )
 
-function saveChanges() {
+// --- Save / Discard ---
+async function saveChanges() {
+  const roleValue = currentRole.value
+
   if (isNew.value) {
-    rolesStore.addRole({
-      name: localDetails.name,
-      description: localDetails.description,
-      enabled: localDetails.status,
-      users: userItems.value,
-      restrictedZones: zoneItems.value,
+    await rolesStore.addRole({
+      name:        roleValue.name,
+      description: roleValue.description,
+      enabled:     roleValue.enabled,
+      user_ids:    roleValue.users.map((u) => u.id),
+      zone_ids:    roleValue.zones.map((z) => z.id),
     })
     emit('create')
     return
   }
-  origName.value = localDetails.name
-  origDescription.value = localDetails.description
-  origStatus.value = localDetails.status
-  userItems.value.forEach((u) => (u.original = u.enabled))
-  zoneItems.value.forEach((z) => (z.original = z.enabled))
+
+  await rolesStore.updateRole(props.role.id, {
+    name:        roleValue.name,
+    description: roleValue.description,
+    enabled:     roleValue.enabled,
+    user_ids:    roleValue.users.map((u) => u.id),
+    zone_ids:    roleValue.zones.map((z) => z.id),
+  })
 }
 
 function discardChanges() {
@@ -107,13 +108,7 @@ function discardChanges() {
     emit('create')
     return
   }
-  Object.assign(localDetails, {
-    name: origName.value,
-    description: origDescription.value,
-    status: origStatus.value,
-  })
-  userItems.value.forEach((u) => (u.enabled = u.original))
-  zoneItems.value.forEach((z) => (z.enabled = z.original))
+  currentRole.value = dpRole()
 }
 
 // --- Delete ---
@@ -130,21 +125,35 @@ const tabDefs = computed(() => [
     label: 'Detalles',
     icon: InformationCircleIcon,
     component: RoleDetallesTab,
-    props: { localDetails, statusOptions },
+    props: { localDetails: currentRole.value, statusOptions },
   },
   {
     key: 'usuarios',
     label: 'Usuarios',
     icon: UsersIcon,
     component: RoleUsuariosTab,
-    props: { currentItems: userItems.value },
+    props: {
+      allItems:      allUsers.value,
+      selectedItems: currentRole.value.users,
+      originalItems: originalRole.value.users ?? [],
+    },
+    listeners: {
+      change: (items) => { currentRole.value.users = items },
+    },
   },
   {
     key: 'zonas',
     label: 'Zonas Restringidas',
     icon: ShieldCheckIcon,
     component: RoleZonasTab,
-    props: { currentItems: zoneItems.value },
+    props: {
+      allItems:      allZones.value,
+      selectedItems: currentRole.value.zones,
+      originalItems: originalRole.value.zones ?? [],
+    },
+    listeners: {
+      change: (items) => { currentRole.value.zones = items },
+    },
   },
 ])
 </script>
