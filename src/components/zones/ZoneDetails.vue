@@ -85,6 +85,7 @@ const hasPendingChanges = computed(() =>
 async function saveChanges() {
   const v = currentZone.value
   const payload = {
+    organization_id: 1,
     name:        v.name,
     description: v.description,
     type:        v.type,
@@ -141,10 +142,10 @@ const tabDefs = computed(() => [
   },
   {
     key: 'invitados',
-    label: 'Invitados',
+    label: 'Pases de Invitados',
     icon: UsersIcon,
     component: ZoneInvitadosTab,
-    props: { currentItems: currentZone.value.visitors ?? [] },
+    props: { currentItems: currentZone.value.passes ?? [] },
   },
 ])
 </script>

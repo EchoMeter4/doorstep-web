@@ -84,6 +84,7 @@ async function saveChanges() {
 
   if (isNew.value) {
     await rolesStore.addRole({
+      organization_id: 1,
       name:        roleValue.name,
       description: roleValue.description,
       enabled:     roleValue.enabled,

@@ -68,7 +68,7 @@ const fuse = computed(() => new Fuse(zonesStore.zones, { keys: ['name', 'descrip
 
 const allRoles = computed(() => {
   const roles = new Set()
-  zonesStore.zones.forEach((z) => z.roles.forEach((r) => roles.add(r)))
+  zonesStore.zones.forEach((z) => z.roles.forEach((r) => roles.add(r.name)))
   return Array.from(roles).sort()
 })
 
@@ -86,7 +86,7 @@ const filteredZones = computed(() => {
     results = results.filter((z) => z.type === activeTypeFilter.value)
   }
   if (activeRoleFilter.value !== 'all') {
-    results = results.filter((z) => z.roles.includes(activeRoleFilter.value))
+    results = results.filter((z) => z.roles.some((r) => r.name === activeRoleFilter.value))
   }
   if (activeStatusFilter.value !== null) {
     results = results.filter((z) => z.enabled === (activeStatusFilter.value === 'active'))
@@ -185,7 +185,7 @@ function closeCreateModal() {
 
           <!-- Role badges (max 2 + overflow pill) -->
           <div class="px-6 py-4">
-            <overflow-badge-list :items="zone.roles" />
+            <overflow-badge-list :items="zone.roles.map((r) => r.name)" />
           </div>
 
           <!-- Status pill -->
