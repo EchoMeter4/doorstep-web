@@ -10,8 +10,7 @@ const props = defineProps({
 })
 
 const credentialTypeBadge = {
-  rfid: { icon: CreditCardIcon, label: 'RFID', colorClass: 'bg-blue-50 text-blue-600' },
-  qr: { icon: QrCodeIcon, label: 'QR', colorClass: 'bg-purple-50 text-purple-600' },
+  credential: { icon: CreditCardIcon, label: 'Credencial', colorClass: 'bg-blue-50 text-blue-600' },
   lpn: { icon: TruckIcon, label: 'Placa', colorClass: 'bg-orange-50 text-orange-600' },
 }
 
@@ -47,7 +46,7 @@ const filteredUsers = computed(() => {
       <div v-if="log.users[0]?.credential" class="flex items-center gap-2">
         <icon-badge
           :icon="credentialTypeBadge[log.users[0].credential.type.toLowerCase()]?.icon"
-          :label="log.users[0].credential.type"
+          :label="credentialTypeBadge[log.users[0].credential.type.toLowerCase()]?.label"
           :color-class="
             credentialTypeBadge[log.users[0].credential.type.toLowerCase()]?.colorClass ??
             'bg-gray-100 text-gray-600'
