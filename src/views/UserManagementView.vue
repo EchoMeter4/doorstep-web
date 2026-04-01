@@ -172,8 +172,8 @@ function closeCreateModal() {
 
           <!-- Credential -->
           <div class="px-6 py-4">
-            <span v-if="user.credential" class="text-sm text-gray-700">
-              {{ user.credential.type }} · {{ user.credential.number }}
+            <span v-if="user.credential" class="bg-blue-50 text-blue-600 text-xs px-2.5 py-1 rounded-full font-medium">
+              {{ user.credential.credentialCode }}
             </span>
             <span v-else class="text-sm text-gray-300">Sin credencial</span>
           </div>

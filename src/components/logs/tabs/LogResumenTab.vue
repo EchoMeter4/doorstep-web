@@ -15,7 +15,7 @@ defineProps({
 })
 
 const credentialTypeBadge = {
-  credential: { icon: CreditCardIcon, label: 'RFID', colorClass: 'bg-blue-50 text-blue-600' },
+  credential: { icon: CreditCardIcon, label: 'Credencial', colorClass: 'bg-blue-50 text-blue-600' },
   lpn: { icon: TruckIcon, label: 'Placa', colorClass: 'bg-orange-50 text-orange-600' },
 }
 

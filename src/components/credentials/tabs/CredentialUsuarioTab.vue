@@ -1,4 +1,5 @@
 <script setup>
+/* eslint-disable vue/no-mutating-props */
 import { computed, ref } from 'vue'
 import Fuse from 'fuse.js'
 import { CheckIcon } from '@heroicons/vue/24/solid'
@@ -46,6 +47,12 @@ function selectUser(clicked) {
         <span class="text-sm">{{ item.name }}</span>
         <check-icon v-if="item.selected" class="size-5 text-brand-secondary shrink-0" />
       </button>
+      <div
+        v-if="filteredItems.length === 0"
+        class="px-10 py-8 text-sm text-gray-400 text-center"
+      >
+        Sin resultados
+      </div>
     </div>
   </div>
 </template>

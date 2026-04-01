@@ -6,7 +6,8 @@ import RoleManagementView from '@/views/RoleManagementView.vue'
 import ZoneManagementView from '@/views/ZoneManagementView.vue'
 import UserManagementView from '@/views/UserManagementView.vue'
 import AccessLogsView from '@/views/AccessLogsView.vue'
-import AccessMethodsView from '@/views/AccessMethodsView.vue'
+import CredentialsView from '@/views/CredentialsView.vue'
+import VehiclesView from '@/views/VehiclesView.vue'
 import VisitorsView from '@/views/VisitorsView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 
@@ -44,10 +45,16 @@ const router = createRouter({
           meta: { title: 'Gestionar Usuarios' },
         },
         {
-          path: 'access-methods',
-          name: 'access-methods',
-          component: AccessMethodsView,
-          meta: { title: 'Gestionar Métodos de Acceso' },
+          path: 'credentials',
+          name: 'credentials',
+          component: CredentialsView,
+          meta: { title: 'Gestionar Credenciales' },
+        },
+        {
+          path: 'vehicles',
+          name: 'vehicles',
+          component: VehiclesView,
+          meta: { title: 'Gestionar Vehículos' },
         },
         {
           path: 'visitors',

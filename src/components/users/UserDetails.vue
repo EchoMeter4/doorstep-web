@@ -11,10 +11,11 @@ import DeleteButton from '@/components/DeleteButton.vue'
 import PendingChangesBar from '@/components/PendingChangesBar.vue'
 import UserDetallesTab from '@/components/users/tabs/UserDetallesTab.vue'
 import UserRolesTab from '@/components/users/tabs/UserRolesTab.vue'
-import UserPlacasTab from '@/components/users/tabs/UserPlacasTab.vue'
+import UserVehiclesTab from '@/components/users/tabs/UserVehiclesTab.vue'
 import { useUsersStore } from '@/stores/users'
 import Roles from '@/services/roles.js'
 import Vehicles from '@/services/vehicles.js'
+import Credentials from '@/services/credentials.js'
 
 const props = defineProps({
   user: { type: Object, required: true },
@@ -30,6 +31,7 @@ const currentUser = ref(dpUser())
 
 const allRoles = ref([])
 const allVehicles = ref([])
+const allCredentials = ref([])
 
 const emit = defineEmits(['delete', 'create', 'close'])
 const usersStore = useUsersStore()
@@ -49,7 +51,6 @@ const statusOptions = [
     ringClass: 'ring-gray-400',
   },
 ]
-const credentialTypes = ['RFID', 'QR']
 
 // --- Sync when a different user is opened ---
 watch(
@@ -61,9 +62,24 @@ watch(
 
 // --- Fetch full reference lists when the panel opens ---
 async function fetchRelatedData() {
-  const [rolesRes, vehiclesRes] = await Promise.all([Roles.getAll(), Vehicles.getAll()])
+  const [rolesRes, vehiclesRes, credsRes] = await Promise.all([
+    Roles.getAll(),
+    Vehicles.getAll(),
+    Credentials.getAll(),
+  ])
   allRoles.value = rolesRes.data.roles.map((r) => ({ id: r.id, name: r.name }))
-  allVehicles.value = vehiclesRes.data.vehicles.map((v) => ({ id: v.id, name: v.name }))
+  allVehicles.value = vehiclesRes.data.vehicles.map((v) => ({
+    id: v.id,
+    name:
+      v.make || v.model
+        ? `${[v.make, v.model].filter(Boolean).join(' ')} · ${v.plateNumber}`
+        : v.plateNumber,
+  }))
+  // Show unassigned credentials + the one currently on this user
+  const currentCredId = props.user.credential?.id ?? null
+  allCredentials.value = credsRes.data.credentials.filter(
+    (c) => c.userId === null || c.id === currentCredId,
+  )
 }
 
 onMounted(fetchRelatedData)
@@ -76,6 +92,8 @@ function normalizeUserForComparison(user) {
     secondLastName: user.secondLastName?.trim() || null,
     roles: [...user.roles].map((r) => r.id).sort((a, b) => a - b),
     vehicles: [...user.vehicles].map((v) => v.id).sort((a, b) => a - b),
+    // isLocalNew credentials have id=null but are still a pending change
+    credential: user.credential ? (user.credential.isLocalNew ? user.credential.credentialCode : user.credential.id) : null,
   }
 }
 
@@ -89,21 +107,34 @@ const hasPendingChanges = computed(() => {
 // --- Save / Discard ---
 async function saveChanges() {
   const userValue = currentUser.value
+  const newCred = userValue.credential
+  const oldCred = props.user.credential
 
   if (isNew.value) {
-    await usersStore.addUser({
+    const created = await usersStore.addUser({
       name: userValue.name,
       middle_name: userValue.middleName,
       first_last_name: userValue.firstLastName,
       second_last_name: userValue.secondLastName,
       email: userValue.email,
       enabled: userValue.enabled,
-      credential: userValue.credentialType
-        ? { id: Date.now(), number: userValue.credentialNumber, type: userValue.credentialType }
-        : null,
       roles: userValue.roles.map((r) => r.id),
-      plates: userValue.vehicles.map((v) => v.id),
+      vehicles: userValue.vehicles.map((v) => v.id),
     })
+    // Link or create credential after user is created
+    if (newCred) {
+      const userId = created?.id ?? null
+      if (newCred.isLocalNew) {
+        await Credentials.create({
+          credential_code: newCred.credentialCode,
+          user_id: userId,
+          is_active: true,
+          issued_at: null,
+        })
+      } else {
+        await Credentials.update(newCred.id, { user_id: userId })
+      }
+    }
     emit('create')
     return
   }
@@ -118,6 +149,29 @@ async function saveChanges() {
     roles: userValue.roles.map((r) => r.id),
     vehicles: userValue.vehicles.map((v) => v.id),
   })
+
+  // Handle credential changes independently
+  const credentialChanged = (oldCred?.id ?? null) !== (newCred?.id ?? null) || newCred?.isLocalNew
+  if (credentialChanged) {
+    // Unlink old credential if there was one
+    if (oldCred && (!newCred || oldCred.id !== newCred?.id)) {
+      await Credentials.update(oldCred.id, { user_id: null })
+    }
+    if (newCred) {
+      if (newCred.isLocalNew) {
+        await Credentials.create({
+          credential_code: newCred.credentialCode,
+          user_id: props.user.id,
+          is_active: true,
+          issued_at: null,
+        })
+      } else {
+        await Credentials.update(newCred.id, { user_id: props.user.id })
+      }
+    }
+    // Refresh user to get updated credential from backend
+    await usersStore.fetchUsers()
+  }
 }
 
 function discardChanges() {
@@ -142,7 +196,7 @@ const tabDefs = computed(() => [
     label: 'Detalles',
     icon: InformationCircleIcon,
     component: UserDetallesTab,
-    props: { localDetails: currentUser.value, statusOptions, credentialTypes },
+    props: { localDetails: currentUser.value, statusOptions, credentialOptions: allCredentials.value },
   },
   {
     key: 'roles',
@@ -161,10 +215,10 @@ const tabDefs = computed(() => [
     },
   },
   {
-    key: 'placas',
-    label: 'Placas',
+    key: 'vehicles',
+    label: 'Vehículos',
     icon: IdentificationIcon,
-    component: UserPlacasTab,
+    component: UserVehiclesTab,
     props: {
       allItems: allVehicles.value,
       selectedItems: currentUser.value.vehicles,

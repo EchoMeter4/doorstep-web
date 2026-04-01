@@ -4,9 +4,10 @@ import SidebarButton from '@/components/SidebarButton.vue'
 import {
   ChartPieIcon,
   ClipboardDocumentListIcon,
-  FingerPrintIcon,
+  CreditCardIcon,
   MapPinIcon,
   TicketIcon,
+  TruckIcon,
   UserGroupIcon,
   UsersIcon,
 } from '@heroicons/vue/24/solid'
@@ -38,9 +39,14 @@ const sections = [
     routeName: 'zones',
   },
   {
-    name: 'Métodos de Acceso',
-    icon: FingerPrintIcon,
-    routeName: 'access-methods',
+    name: 'Credenciales',
+    icon: CreditCardIcon,
+    routeName: 'credentials',
+  },
+  {
+    name: 'Vehículos',
+    icon: TruckIcon,
+    routeName: 'vehicles',
   },
   {
     name: 'Visitantes',

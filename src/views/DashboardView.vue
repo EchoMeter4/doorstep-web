@@ -3,7 +3,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { CheckCircleIcon, IdentificationIcon, UserIcon, XCircleIcon } from '@heroicons/vue/24/solid'
 import { useLogsStore } from '@/stores/logs.js'
 import { useUsersStore } from '@/stores/users.js'
-import { usePlatesStore } from '@/stores/plates.js'
 import StatCard from '@/components/dashboard/StatCard.vue'
 import AccessTypeChart from '@/components/dashboard/AccessTypeChart.vue'
 import AccessBreakdownPanel from '@/components/dashboard/AccessBreakdownPanel.vue'
@@ -13,8 +12,6 @@ import RecentAccessList from '@/components/dashboard/RecentAccessList.vue'
 
 const logsStore = useLogsStore()
 const usersStore = useUsersStore()
-const platesStore = usePlatesStore()
-
 const isLoading = computed(() => logsStore.isLoading)
 
 // Date filter state — default to current month

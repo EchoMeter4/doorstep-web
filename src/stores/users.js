@@ -63,6 +63,7 @@ export const useUsersStore = defineStore('users', () => {
     try {
       const res = await Users.create(data)
       users.value.push(res.data.user)
+      return res.data.user
     } finally {
       isLoading.value = false
     }

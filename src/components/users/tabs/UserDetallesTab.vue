@@ -1,12 +1,58 @@
 <script setup>
 /* eslint-disable vue/no-mutating-props */
+import { computed, ref } from 'vue'
+import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/vue/24/solid'
 import IconBadge from '@/components/IconBadge.vue'
+import SearchInput from '@/components/SearchInput.vue'
 
-defineProps({
+const props = defineProps({
   localDetails: { type: Object, required: true },
   statusOptions: { type: Array, required: true },
-  credentialTypes: { type: Array, required: true },
+  credentialOptions: { type: Array, default: () => [] },
 })
+
+// --- Credential picker state ---
+const showCredentialPicker = ref(false)
+const credentialSearch = ref('')
+const newCredentialCode = ref('')
+
+const filteredCredentialOptions = computed(() => {
+  const clean = credentialSearch.value.trim().toLowerCase()
+  if (!clean) return props.credentialOptions
+  return props.credentialOptions.filter((c) =>
+    c.credentialCode.toLowerCase().includes(clean),
+  )
+})
+
+function selectCredential(cred) {
+  props.localDetails.credential = {
+    id: cred.id,
+    credentialCode: cred.credentialCode,
+    isActive: cred.isActive,
+    issuedAt: cred.issuedAt,
+  }
+  showCredentialPicker.value = false
+  credentialSearch.value = ''
+}
+
+function removeCredential() {
+  props.localDetails.credential = null
+  showCredentialPicker.value = false
+}
+
+function createCredentialLocal() {
+  const code = newCredentialCode.value.trim()
+  if (!code) return
+  props.localDetails.credential = { id: null, credentialCode: code, isActive: true, issuedAt: null, isLocalNew: true }
+  showCredentialPicker.value = false
+  newCredentialCode.value = ''
+  credentialSearch.value = ''
+}
+
+function openPicker() {
+  showCredentialPicker.value = true
+  credentialSearch.value = ''
+}
 </script>
 
 <template>
@@ -85,39 +131,70 @@ defineProps({
     <!-- Credential section -->
     <div class="flex flex-col gap-2">
       <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Credencial</label>
-      <div class="flex flex-row gap-2 flex-wrap">
+
+      <!-- Current credential display -->
+      <div v-if="localDetails.credential && !showCredentialPicker" class="flex items-center gap-2">
+        <span class="bg-blue-50 text-blue-600 text-xs px-3 py-1.5 rounded-full font-medium">
+          {{ localDetails.credential.credentialCode }}
+          <span v-if="localDetails.credential.isLocalNew" class="text-blue-400"> (nueva)</span>
+        </span>
         <button
-          v-for="type in credentialTypes"
-          :key="type"
-          class="px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-          :class="
-            localDetails.credentialType === type
-              ? 'bg-brand-secondary text-white border-brand-secondary'
-              : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400'
-          "
-          @click="localDetails.credentialType = type"
+          class="text-xs text-gray-400 hover:text-brand-secondary transition-colors"
+          @click="openPicker"
         >
-          {{ type }}
+          Cambiar
         </button>
         <button
-          class="px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-          :class="
-            localDetails.credentialType === null
-              ? 'bg-gray-200 text-gray-700 border-gray-400'
-              : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
-          "
-          @click="localDetails.credentialType = null"
+          class="text-gray-300 hover:text-red-400 transition-colors"
+          @click="removeCredential"
         >
-          Sin credencial
+          <x-mark-icon class="size-3.5" />
         </button>
       </div>
-      <input
-        v-if="localDetails.credentialType !== null"
-        v-model="localDetails.credentialNumber"
-        class="border-b border-gray-300 outline-none py-1.5 text-sm focus:border-brand-secondary transition-colors mt-1"
-        type="text"
-        placeholder="Número de credencial"
-      />
+
+      <!-- Credential picker -->
+      <div v-if="!localDetails.credential || showCredentialPicker" class="flex flex-col gap-2">
+        <search-input v-model="credentialSearch" placeholder="Buscar código..." />
+
+        <div
+          v-if="filteredCredentialOptions.length > 0"
+          class="flex flex-col max-h-36 overflow-y-auto border border-gray-100 rounded-xl"
+        >
+          <button
+            v-for="cred in filteredCredentialOptions"
+            :key="cred.id"
+            class="flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors"
+            @click="selectCredential(cred)"
+          >
+            <span class="text-gray-700">{{ cred.credentialCode }}</span>
+            <check-icon
+              v-if="localDetails.credential?.id === cred.id"
+              class="size-4 text-brand-secondary shrink-0"
+            />
+          </button>
+        </div>
+        <p v-else-if="credentialSearch" class="text-xs text-gray-400 px-1">
+          Sin resultados — crea una nueva abajo
+        </p>
+
+        <!-- Create new credential inline -->
+        <div class="flex gap-2 items-center mt-1">
+          <input
+            v-model="newCredentialCode"
+            class="flex-1 border-b border-gray-300 outline-none py-1.5 text-sm focus:border-brand-secondary transition-colors"
+            type="text"
+            placeholder="Nuevo código de credencial"
+            @keyup.enter="createCredentialLocal"
+          />
+          <button
+            class="flex items-center gap-1 px-3 py-1.5 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-xs font-medium rounded-full transition-colors shrink-0"
+            @click="createCredentialLocal"
+          >
+            <plus-icon class="size-3.5" />
+            Crear
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
