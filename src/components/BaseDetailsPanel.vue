@@ -9,16 +9,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const activeTab = ref(props.tabDefs[0].key)
-const currentTab = computed(() => props.tabDefs.find((t) => t.key === activeTab.value))
-
-// Reset to first tab when a different entity is opened (tabDefs array reference changes)
-watch(
-  () => props.tabDefs,
-  () => {
-    activeTab.value = props.tabDefs[0].key
-  },
-)
+const activeTab = ref(props.tabDefs[0]?.key ?? null)
+const currentTab = computed(() => props.tabDefs.find((t) => t.key === activeTab.value)) ?? props.tabDefs[0]
 </script>
 
 <template>
@@ -62,7 +54,7 @@ watch(
         </button>
       </div>
       <div class="flex-1 overflow-y-auto">
-        <component :is="currentTab.component" v-bind="currentTab.props ?? {}" />
+        <component :is="currentTab.component" v-bind="currentTab.props ?? {}" v-on="currentTab.listeners ?? {}" />
       </div>
       <slot name="overlay" />
     </div>

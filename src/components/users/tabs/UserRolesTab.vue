@@ -2,11 +2,20 @@
 import SearchableToggleList from '@/components/SearchableToggleList.vue'
 
 defineProps({
+  allItems:      { type: Array, required: true },
+  selectedItems: { type: Array, required: true },
   originalItems: { type: Array, required: true },
-  currentItems: { type: Array, required: true },
 })
+
+const emit = defineEmits(['change'])
 </script>
 
 <template>
-  <searchable-toggle-list :original-items="originalItems" :currentItems="items" placeholder="Buscar roles..." />
+  <searchable-toggle-list
+    :all-items="allItems"
+    :selected-items="selectedItems"
+    :original-items="originalItems"
+    placeholder="Buscar roles..."
+    @change="emit('change', $event)"
+  />
 </template>

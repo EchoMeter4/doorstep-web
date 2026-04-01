@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   IdentificationIcon,
   InformationCircleIcon,
@@ -13,25 +13,25 @@ import UserDetallesTab from '@/components/users/tabs/UserDetallesTab.vue'
 import UserRolesTab from '@/components/users/tabs/UserRolesTab.vue'
 import UserPlacasTab from '@/components/users/tabs/UserPlacasTab.vue'
 import { useUsersStore } from '@/stores/users'
+import Roles from '@/services/roles.js'
+import Vehicles from '@/services/vehicles.js'
 
 const props = defineProps({
   user: { type: Object, required: true },
 })
 
-const currentOriginal = ref(props.user)
-
-function dpUser(){
-  return JSON.parse(JSON.stringify(currentOriginal))
-}
-function resetCurrentUser() {
-  currentUser.value = dpUser()
+// --- Deep-copy helper ---
+function dpUser() {
+  return JSON.parse(JSON.stringify(props.user))
 }
 
-const originalUser = computed(() => props.user)
+// --- State ---
 const currentUser = ref(dpUser())
 
-const emit = defineEmits(['delete', 'create', 'close'])
+const allRoles = ref([])
+const allVehicles = ref([])
 
+const emit = defineEmits(['delete', 'create', 'close'])
 const usersStore = useUsersStore()
 const isNew = computed(() => props.user.id === null)
 
@@ -49,42 +49,47 @@ const statusOptions = [
     ringClass: 'ring-gray-400',
   },
 ]
-
 const credentialTypes = ['RFID', 'QR']
 
-watch(() => props.user, resetCurrentUser)
-
-function objectsAreEqual(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b)
-}
-
-const hasPendingChanges = computed(() =>
-  Object.keys(originalUser.value).some(
-    (key) => {
-      const originalValue = originalUser.value[key]
-      const editableValue = currentUser.value[key]
-      
-      // Array fields
-      if (Array.isArray(originalValue) && Array.isArray(editableValue)) {
-        originalValue.sort((a, b) => a.id - b.id)
-        editableValue.sort((a, b) => a.id - b.id)
-        return !objectsAreEqual(originalValue, editableValue)
-      }
-      
-      // Object fields
-      if (typeof originalValue === 'object' && originalValue !== null) {
-        return !objectsAreEqual(originalValue, editableValue)
-      }
-      
-      // Primitive fields
-      return originalValue !== editableValue
-    }
-  ),
+// --- Sync when a different user is opened ---
+watch(
+  () => props.user,
+  () => {
+    currentUser.value = dpUser()
+  },
 )
 
+// --- Fetch full reference lists when the panel opens ---
+async function fetchRelatedData() {
+  const [rolesRes, vehiclesRes] = await Promise.all([Roles.getAll(), Vehicles.getAll()])
+  allRoles.value = rolesRes.data.roles.map((r) => ({ id: r.id, name: r.name }))
+  allVehicles.value = vehiclesRes.data.vehicles.map((v) => ({ id: v.id, name: v.name }))
+}
+
+onMounted(fetchRelatedData)
+
+// --- Pending changes ---
+function normalizeUserForComparison(user) {
+  return {
+    ...user,
+    middleName: user.middleName?.trim() || null,
+    secondLastName: user.secondLastName?.trim() || null,
+    roles: [...user.roles].map((r) => r.id).sort((a, b) => a - b),
+    vehicles: [...user.vehicles].map((v) => v.id).sort((a, b) => a - b),
+  }
+}
+
+const hasPendingChanges = computed(() => {
+  return (
+    JSON.stringify(normalizeUserForComparison(props.user)) !==
+    JSON.stringify(normalizeUserForComparison(currentUser.value))
+  )
+})
+
+// --- Save / Discard ---
 async function saveChanges() {
   const userValue = currentUser.value
-  
+
   if (isNew.value) {
     await usersStore.addUser({
       name: userValue.name,
@@ -92,16 +97,12 @@ async function saveChanges() {
       first_last_name: userValue.firstLastName,
       second_last_name: userValue.secondLastName,
       email: userValue.email,
-      enabled: userValue.status,
+      enabled: userValue.enabled,
       credential: userValue.credentialType
-        ? {
-            id: Date.now(),
-            number: userValue.credentialNumber,
-            type: userValue.credentialType,
-          }
+        ? { id: Date.now(), number: userValue.credentialNumber, type: userValue.credentialType }
         : null,
       roles: userValue.roles.map((r) => r.id),
-      plates: userValue.vehicles.map(v => v.id),
+      plates: userValue.vehicles.map((v) => v.id),
     })
     emit('create')
     return
@@ -113,12 +114,10 @@ async function saveChanges() {
     first_last_name: userValue.firstLastName,
     second_last_name: userValue.secondLastName,
     email: userValue.email,
-    enabled: userValue.status,
-    roles: userValue.roles.map(r => r.id),
-    vehicles: userValue.vehicles.map(v => v.id),
+    enabled: userValue.enabled,
+    roles: userValue.roles.map((r) => r.id),
+    vehicles: userValue.vehicles.map((v) => v.id),
   })
-
-  originalUser.value = JSON.parse(JSON.stringify(currentUser.value))
 }
 
 function discardChanges() {
@@ -126,8 +125,7 @@ function discardChanges() {
     emit('create')
     return
   }
-
-  resetCurrentUser()
+  currentUser.value = dpUser()
 }
 
 // --- Delete ---
@@ -137,32 +135,46 @@ function deleteUser() {
   emit('delete', props.user)
 }
 
-function updateRolesList() {
-}
-
-// --- Tab definitions (computed so roleItems/plateItems changes trigger tabDefs watch in BaseDetailsPanel) ---
+// --- Tab definitions ---
 const tabDefs = computed(() => [
   {
     key: 'detalles',
     label: 'Detalles',
     icon: InformationCircleIcon,
     component: UserDetallesTab,
-    props: { editableUser: currentUser, statusOptions, credentialTypes },
+    props: { localDetails: currentUser.value, statusOptions, credentialTypes },
   },
   {
     key: 'roles',
     label: 'Roles',
     icon: UsersIcon,
     component: UserRolesTab,
-    props: { currentItems: currentUser.value.roles },
-    listeners: {'onInput': updateRolesList}
+    props: {
+      allItems: allRoles.value,
+      selectedItems: currentUser.value.roles,
+      originalItems: props.user.roles ?? [],
+    },
+    listeners: {
+      change: (items) => {
+        currentUser.value.roles = items
+      },
+    },
   },
   {
     key: 'placas',
     label: 'Placas',
     icon: IdentificationIcon,
     component: UserPlacasTab,
-    props: { currentItems: currentUser.value.plates },
+    props: {
+      allItems: allVehicles.value,
+      selectedItems: currentUser.value.vehicles,
+      originalItems: props.user.vehicles ?? [],
+    },
+    listeners: {
+      change: (items) => {
+        currentUser.value.vehicles = items
+      },
+    },
   },
 ])
 </script>

@@ -1,25 +1,26 @@
 <script setup>
-/* eslint-disable vue/no-mutating-props */
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import SearchableToggleList from '@/components/SearchableToggleList.vue'
 
 const props = defineProps({
-  currentItems: { type: Array, required: true },
+  allItems:      { type: Array, required: true },
+  selectedItems: { type: Array, required: true },
+  originalItems: { type: Array, required: true },
 })
 
+const emit = defineEmits(['change'])
+
 const newPlate = ref('')
+const localNewItems = ref([])
+const mergedAllItems = computed(() => [...props.allItems, ...localNewItems.value])
 
 function addPlate() {
   const trimmed = newPlate.value.trim().toUpperCase()
   if (!trimmed) return
-  props.currentItems.push({
-    id: Date.now(),
-    name: trimmed,
-    enabled: true,
-    original: false,
-    isLocalNew: true,
-  })
+  const newItem = { id: Date.now(), name: trimmed, isLocalNew: true }
+  localNewItems.value.push(newItem)
+  emit('change', [...props.selectedItems, newItem])
   newPlate.value = ''
 }
 </script>
@@ -42,6 +43,12 @@ function addPlate() {
         Agregar
       </button>
     </div>
-    <searchable-toggle-list :currentItems="items" placeholder="Buscar placa..." />
+    <searchable-toggle-list
+      :all-items="mergedAllItems"
+      :selected-items="selectedItems"
+      :original-items="originalItems"
+      placeholder="Buscar placa..."
+      @change="emit('change', $event)"
+    />
   </div>
 </template>

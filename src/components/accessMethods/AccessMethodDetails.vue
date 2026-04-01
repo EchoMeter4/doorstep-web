@@ -48,8 +48,8 @@ const statusOptions = [
 
 const typeOptions = [
   {
-    value: 'rfid',
-    label: 'RFID',
+    value: 'credential',
+    label: 'Credencial',
     icon: CreditCardIcon,
     pillClass: 'bg-blue-50 text-blue-600',
     ringClass: 'ring-blue-500',

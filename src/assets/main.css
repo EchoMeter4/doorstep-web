@@ -31,6 +31,8 @@
 body {
   @apply font-sans;
   background-color: #fafbfc;
+  min-height: 100vh;
+  min-width: 100vw;
 }
 
 button:hover {
