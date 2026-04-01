@@ -1,69 +1,62 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import Zones from '@/services/zones.js'
 
 export const useZonesStore = defineStore('zones', () => {
-  const zones = ref([
-    {
-      id: 1,
-      name: 'Edificio A',
-      description: 'Área administrativa principal',
-      type: 'pedestrian',
-      roles: ['Administrador', 'Directivo'],
-      enabled: true,
-    },
-    {
-      id: 2,
-      name: 'Edificio B',
-      description: 'Departamento de operaciones',
-      type: 'mixed',
-      roles: ['Administrador', 'Empleado', 'Auxiliar'],
-      enabled: true,
-    },
-    {
-      id: 3,
-      name: 'Edificio C',
-      description: 'Centro de desarrollo tecnológico',
-      type: 'pedestrian',
-      roles: ['Administrador', 'Empleado'],
-      enabled: true,
-    },
-    {
-      id: 4,
-      name: 'Edificio D',
-      description: 'Área de recursos humanos',
-      type: 'pedestrian',
-      roles: ['Administrador'],
-      enabled: false,
-    },
-    {
-      id: 5,
-      name: 'Estacionamiento Norte',
-      description: 'Zona de estacionamiento vehicular norte',
-      type: 'vehicular',
-      roles: ['Administrador', 'Directivo', 'Empleado'],
-      enabled: true,
-    },
-    {
-      id: 6,
-      name: 'Estacionamiento Sur',
-      description: 'Zona de estacionamiento vehicular sur',
-      type: 'vehicular',
-      roles: ['Visitante', 'Empleado'],
-      enabled: true,
-    },
-  ])
+  const zones = ref([])
+  const isLoading = ref(false)
 
   const activeCount = computed(() => zones.value.filter((z) => z.enabled).length)
   const inactiveCount = computed(() => zones.value.filter((z) => !z.enabled).length)
+
+  async function fetchZones() {
+    isLoading.value = true
+    try {
+      const res = await Zones.getAll()
+      zones.value = res.data.zones
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function addZone(data) {
+    isLoading.value = true
+    try {
+      const res = await Zones.create(data)
+      zones.value.push(res.data.zone)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function updateZone(id, payload) {
+    isLoading.value = true
+    try {
+      const res = await Zones.update(id, payload)
+      const idx = zones.value.findIndex((z) => z.id === id)
+      if (idx !== -1) {
+        // Mutate in place to preserve the reference held by any open detail panel
+        Object.assign(zones.value[idx], res.data.zone)
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function deleteZone(id) {
+    isLoading.value = true
+    try {
+      await Zones.remove(id)
+      const idx = zones.value.findIndex((z) => z.id === id)
+      if (idx !== -1) zones.value.splice(idx, 1)
+    } finally {
+      isLoading.value = false
+    }
+  }
 
   function createEmpty() {
     return { id: null, name: '', description: '', type: 'pedestrian', enabled: true, roles: [] }
   }
 
-  function addZone(data) {
-    const id = Math.max(0, ...zones.value.map((z) => z.id)) + 1
-    zones.value.push({ id, ...data })
-  }
-
-  return { zones, activeCount, inactiveCount, createEmpty, addZone }
+  return { zones, isLoading, activeCount, inactiveCount, fetchZones, addZone, updateZone, deleteZone, createEmpty }
 })

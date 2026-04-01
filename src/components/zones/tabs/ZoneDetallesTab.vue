@@ -71,11 +71,11 @@ defineProps({
           :key="String(opt.value)"
           class="transition-all"
           :class="
-            localDetails.status === opt.value
+            localDetails.enabled === opt.value
               ? 'opacity-100 ring-2 ring-offset-1 rounded-full ' + opt.ringClass
               : 'opacity-60 hover:opacity-80'
           "
-          @click="localDetails.status = opt.value"
+          @click="localDetails.enabled = opt.value"
         >
           <icon-badge :label="opt.label" :color-class="opt.pillClass" />
         </button>

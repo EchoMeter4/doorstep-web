@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Fuse from 'fuse.js'
 import { ArrowsRightLeftIcon, PlusIcon, TruckIcon, UserIcon } from '@heroicons/vue/24/solid'
 import SearchInput from '@/components/SearchInput.vue'
@@ -13,6 +13,9 @@ import ZoneDetails from '@/components/zones/ZoneDetails.vue'
 import { useZonesStore } from '@/stores/zones'
 
 const zonesStore = useZonesStore()
+
+onMounted(() => zonesStore.fetchZones())
+
 
 const typeLabels = {
   pedestrian: 'Peatonal',
@@ -61,7 +64,7 @@ const typeFilters = [
   { key: 'mixed', label: 'Mixta' },
 ]
 
-const fuse = new Fuse(zonesStore.zones, { keys: ['name', 'description'], threshold: 0.4 })
+const fuse = computed(() => new Fuse(zonesStore.zones, { keys: ['name', 'description'], threshold: 0.4 }))
 
 const allRoles = computed(() => {
   const roles = new Set()
@@ -77,7 +80,7 @@ const roleFilterOptions = computed(() => [
 const filteredZones = computed(() => {
   const cleanSearch = search.value.trim()
   let results =
-    cleanSearch.length > 0 ? fuse.search(cleanSearch).map((r) => r.item) : zonesStore.zones
+    cleanSearch.length > 0 ? fuse.value.search(cleanSearch).map((r) => r.item) : zonesStore.zones
 
   if (activeTypeFilter.value !== 'all') {
     results = results.filter((z) => z.type === activeTypeFilter.value)
@@ -101,6 +104,11 @@ function closeDetailsModal() {
   selectedZone.value = null
 }
 
+async function handleDelete(zone) {
+  await zonesStore.deleteZone(zone.id)
+  closeDetailsModal()
+}
+
 const isCreating = ref(false)
 function openCreateModal() {
   isCreating.value = true
@@ -112,7 +120,7 @@ function closeCreateModal() {
 
 <template>
   <div class="flex flex-col gap-6 size-full">
-    <zone-details v-if="selectedZone" :zone="selectedZone" @close="closeDetailsModal" />
+    <zone-details v-if="selectedZone" :zone="selectedZone" @delete="handleDelete" @close="closeDetailsModal" />
     <zone-details v-if="isCreating" :zone="zonesStore.createEmpty()" @create="closeCreateModal" @close="closeCreateModal" />
     <!-- Main content card -->
     <base-table

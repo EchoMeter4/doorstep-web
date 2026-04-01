@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   ArrowsRightLeftIcon,
   InformationCircleIcon,
@@ -16,6 +16,7 @@ import ZoneDetallesTab from '@/components/zones/tabs/ZoneDetallesTab.vue'
 import ZoneRolesTab from '@/components/zones/tabs/ZoneRolesTab.vue'
 import ZoneInvitadosTab from '@/components/zones/tabs/ZoneInvitadosTab.vue'
 import { useZonesStore } from '@/stores/zones'
+import Roles from '@/services/roles.js'
 
 const props = defineProps({
   zone: { type: Object, required: true },
@@ -35,109 +36,69 @@ const typeClasses = {
 const typeIcons = { pedestrian: UserIcon, vehicular: TruckIcon, mixed: ArrowsRightLeftIcon }
 
 const statusOptions = [
-  {
-    value: true,
-    label: 'Activo',
-    pillClass: 'bg-green-100 text-green-700',
-    ringClass: 'ring-green-600',
-  },
-  {
-    value: false,
-    label: 'Inactivo',
-    pillClass: 'bg-gray-100 text-gray-500',
-    ringClass: 'ring-gray-400',
-  },
+  { value: true,  label: 'Activo',   pillClass: 'bg-green-100 text-green-700', ringClass: 'ring-green-600' },
+  { value: false, label: 'Inactivo', pillClass: 'bg-gray-100 text-gray-500',   ringClass: 'ring-gray-400' },
 ]
 
-// --- Mutable details state ---
-const localDetails = reactive({
-  name: props.zone?.name ?? '',
-  description: props.zone?.description ?? '',
-  type: props.zone?.type ?? 'pedestrian',
-  status: props.zone?.enabled ?? true,
+// --- Deep-copy helper ---
+function dpZone() {
+  return JSON.parse(JSON.stringify(props.zone))
+}
+
+// --- State ---
+const currentZone = ref(dpZone())
+const originalZone = computed(() => props.zone)
+const allRoles = ref([])
+
+// --- Fetch reference lists when the panel opens ---
+onMounted(async () => {
+  const res = await Roles.getAll()
+  allRoles.value = res.data.roles.map((r) => ({ id: r.id, name: r.name }))
 })
 
-// --- Original values for change tracking and discard ---
-const origName = ref(props.zone?.name ?? '')
-const origDescription = ref(props.zone?.description ?? '')
-const origType = ref(props.zone?.type ?? 'pedestrian')
-const origStatus = ref(props.zone?.enabled ?? true)
-
-// --- Relationship tab state ---
-const roleItems = ref([
-  { id: 1, name: 'Test', description: 'Descripcion de test', original: true, enabled: true },
-  { id: 2, name: 'Empleado', description: 'Descripcion de test', original: true, enabled: true },
-  { id: 3, name: 'Bepis', description: 'Descripcion de test', original: false, enabled: true },
-  { id: 4, name: 'Bepis3', description: 'Descripcion de test', original: false, enabled: true },
-  { id: 5, name: 'Bepis2', description: 'Descripcion de test', original: false, enabled: true },
-])
-
-const guestItems = [
-  {
-    id: 1,
-    name: 'Juan García',
-    admittedFrom: '2025-03-01T08:00:00',
-    admittedTo: '2025-03-01T18:00:00',
-  },
-  {
-    id: 2,
-    name: 'María López',
-    admittedFrom: '2025-04-15T09:30:00',
-    admittedTo: '2025-04-15T17:00:00',
-  },
-  {
-    id: 3,
-    name: 'Carlos Pérez',
-    admittedFrom: '2025-05-10T07:00:00',
-    admittedTo: '2025-05-10T20:00:00',
-  },
-]
-
-// Sync when a different zone is opened
-watch(
-  () => props.zone,
-  (zone) => {
-    origName.value = zone?.name ?? ''
-    origDescription.value = zone?.description ?? ''
-    origType.value = zone?.type ?? 'pedestrian'
-    origStatus.value = zone?.enabled ?? true
-
-    Object.assign(localDetails, {
-      name: zone?.name ?? '',
-      description: zone?.description ?? '',
-      type: zone?.type ?? 'pedestrian',
-      status: zone?.enabled ?? true,
-    })
-  },
-)
+// --- Sync when a different zone is opened ---
+watch(() => props.zone, () => {
+  currentZone.value = dpZone()
+})
 
 // --- Pending changes ---
-const hasPendingChanges = computed(
-  () =>
-    localDetails.name !== origName.value ||
-    localDetails.description !== origDescription.value ||
-    localDetails.type !== origType.value ||
-    localDetails.status !== origStatus.value ||
-    roleItems.value.some((r) => r.enabled !== r.original),
+const hasPendingChanges = computed(() =>
+  Object.keys(originalZone.value).some((key) => {
+    const orig = originalZone.value[key]
+    const edit = currentZone.value[key]
+
+    if (Array.isArray(orig) && Array.isArray(edit)) {
+      const origIds = JSON.stringify([...orig].map((i) => i.id).sort((a, b) => a - b))
+      const editIds = JSON.stringify([...edit].map((i) => i.id).sort((a, b) => a - b))
+      return origIds !== editIds
+    }
+
+    if (typeof orig === 'object' && orig !== null) {
+      return JSON.stringify(orig) !== JSON.stringify(edit)
+    }
+
+    return orig !== edit
+  }),
 )
 
-function saveChanges() {
+// --- Save / Discard ---
+async function saveChanges() {
+  const v = currentZone.value
+  const payload = {
+    name:        v.name,
+    description: v.description,
+    type:        v.type,
+    enabled:     v.enabled,
+    role_ids:    v.roles.map((r) => r.id),
+  }
+
   if (isNew.value) {
-    zonesStore.addZone({
-      name: localDetails.name,
-      description: localDetails.description,
-      type: localDetails.type,
-      enabled: localDetails.status,
-      roles: roleItems.value.filter((r) => r.enabled).map((r) => r.name),
-    })
+    await zonesStore.addZone(payload)
     emit('create')
     return
   }
-  origName.value = localDetails.name
-  origDescription.value = localDetails.description
-  origType.value = localDetails.type
-  origStatus.value = localDetails.status
-  roleItems.value.forEach((r) => (r.original = r.enabled))
+
+  await zonesStore.updateZone(props.zone.id, payload)
 }
 
 function discardChanges() {
@@ -145,13 +106,7 @@ function discardChanges() {
     emit('create')
     return
   }
-  Object.assign(localDetails, {
-    name: origName.value,
-    description: origDescription.value,
-    type: origType.value,
-    status: origStatus.value,
-  })
-  roleItems.value.forEach((r) => (r.enabled = r.original))
+  currentZone.value = dpZone()
 }
 
 // --- Delete ---
@@ -168,21 +123,28 @@ const tabDefs = computed(() => [
     label: 'Detalles',
     icon: InformationCircleIcon,
     component: ZoneDetallesTab,
-    props: { localDetails, statusOptions, typeLabels, typeClasses, typeIcons },
+    props: { localDetails: currentZone.value, statusOptions, typeLabels, typeClasses, typeIcons },
   },
   {
     key: 'roles',
     label: 'Roles Permitidos',
     icon: ShieldCheckIcon,
     component: ZoneRolesTab,
-    props: { currentItems: roleItems.value },
+    props: {
+      allItems:      allRoles.value,
+      selectedItems: currentZone.value.roles,
+      originalItems: originalZone.value.roles ?? [],
+    },
+    listeners: {
+      change: (items) => { currentZone.value.roles = items },
+    },
   },
   {
     key: 'invitados',
     label: 'Invitados',
     icon: UsersIcon,
     component: ZoneInvitadosTab,
-    props: { currentItems: guestItems },
+    props: { currentItems: currentZone.value.visitors ?? [] },
   },
 ])
 </script>
