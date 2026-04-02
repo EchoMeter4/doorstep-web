@@ -22,7 +22,7 @@ function submit() {
 </script>
 
 <template>
-  <div class="flex justify-center items-center py-10 size-full">
+  <div class="flex justify-center items-center py-10 min-h-screen min-w-screen">
     <img
       class="fixed inset-0 object-center object-cover min-w-screen min-h-screen -z-10"
       src="@/assets/Background.svg"

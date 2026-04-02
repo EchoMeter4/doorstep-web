@@ -17,8 +17,7 @@ const isActive = computed(() => router.currentRoute.value.name === props.routeNa
 <template>
   <RouterLink
     :to="{ name: props.routeName }"
-    class="w-full text-left text-white hover:cursor-pointer rounded-2xl py-4
-    px-6 transition-colors duration-200"
+    class="w-full text-left text-white hover:cursor-pointer rounded-2xl py-3.5 px-5 transition-colors duration-200"
     :class="{ 'bg-brand-secondary': isActive, 'hover:bg-slate-800': !isActive }"
   >
     <slot />

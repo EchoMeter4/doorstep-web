@@ -1,7 +1,16 @@
 <script setup>
 import LogoSvg from '@/components/LogoSvg.vue'
 import SidebarButton from '@/components/SidebarButton.vue'
-import { ChartPieIcon, UserGroupIcon } from '@heroicons/vue/24/solid'
+import {
+  ChartPieIcon,
+  ClipboardDocumentListIcon,
+  CreditCardIcon,
+  MapPinIcon,
+  TicketIcon,
+  TruckIcon,
+  UserGroupIcon,
+  UsersIcon,
+} from '@heroicons/vue/24/solid'
 
 const sections = [
   {
@@ -10,27 +19,57 @@ const sections = [
     routeName: 'dashboard',
   },
   {
+    name: 'Registros de Acceso',
+    icon: ClipboardDocumentListIcon,
+    routeName: 'logs',
+  },
+  {
+    name: 'Usuarios',
+    icon: UsersIcon,
+    routeName: 'users',
+  },
+  {
     name: 'Roles',
     icon: UserGroupIcon,
     routeName: 'roles',
+  },
+  {
+    name: 'Zonas Restringidas',
+    icon: MapPinIcon,
+    routeName: 'zones',
+  },
+  {
+    name: 'Credenciales',
+    icon: CreditCardIcon,
+    routeName: 'credentials',
+  },
+  {
+    name: 'Vehículos',
+    icon: TruckIcon,
+    routeName: 'vehicles',
+  },
+  {
+    name: 'Visitantes',
+    icon: TicketIcon,
+    routeName: 'visitors',
   },
 ]
 </script>
 
 <template>
-  <div
-    class="w-70 shadow-2xl bg-brand-primary flex flex-col space-y-12.5 rounded-4xl px-8 py-12.5"
-  >
-    <logo-svg class="h-14 shrink-0" text-classes="text-white" />
-    <div class="flex flex-col space-y-8 w-full">
+  <div class="w-64 bg-brand-primary flex flex-col space-y-10 rounded-4xl px-7 py-10 shadow-sm">
+    <router-link :to="{ name: 'dashboard' }">
+      <logo-svg class="h-12 shrink-0" text-classes="text-white" />
+    </router-link>
+    <div class="flex flex-col space-y-1.5 w-full">
       <sidebar-button
         v-for="section in sections"
         :key="section.name"
         :route-name="section.routeName"
       >
-        <div class="flex flex-row items-center space-x-6">
-          <component :is="section.icon" class="size-8" />
-          <span class="capitalize">{{ section.name }} </span>
+        <div class="flex flex-row items-center space-x-3">
+          <component :is="section.icon" class="size-5" />
+          <span class="capitalize text-sm">{{ section.name }} </span>
         </div>
       </sidebar-button>
     </div>

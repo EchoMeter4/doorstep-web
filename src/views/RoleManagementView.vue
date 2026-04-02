@@ -1,91 +1,194 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Fuse from 'fuse.js'
-import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/solid'
+import { PlusIcon } from '@heroicons/vue/24/solid'
+import SearchInput from '@/components/SearchInput.vue'
+import FilterToggle from '@/components/FilterToggle.vue'
+import FilterDropdown from '@/components/FilterDropdown.vue'
+import OverflowBadgeList from '@/components/OverflowBadgeList.vue'
+import PillSelect from '@/components/PillSelect.vue'
+import BaseTable from '@/components/BaseTable.vue'
+import RoleDetails from '@/components/roles/RoleDetails.vue'
+import { useRolesStore } from '@/stores/roles'
 
-const roles = [
+const rolesStore = useRolesStore()
+
+onMounted(() => rolesStore.fetchRoles())
+
+const roleStatusOptions = [
   {
-    id: 1,
-    name: 'Test',
-    description: 'Descripcion de test',
+    value: true,
+    label: 'Activo',
+    pillClass: 'bg-green-100 text-green-700',
+    dotClass: 'bg-green-500',
+    textClass: 'text-green-700',
   },
   {
-    id: 2,
-    name: 'Empleado',
-    description: 'Descripcion de test',
-  },
-  {
-    id: 3,
-    name: 'Bepis',
-    description: 'Descripcion de test',
+    value: false,
+    label: 'Inactivo',
+    pillClass: 'bg-gray-100 text-gray-500',
+    dotClass: 'bg-gray-400',
+    textClass: 'text-gray-500',
   },
 ]
 
-const fuzzyRoles = new Fuse(roles, { keys: ['name'] })
+const search = ref('')
+const activeStatusFilter = ref(null) // null = all | 'active' | 'inactive'
+const activeUserFilter = ref('all')
+const activeZoneFilter = ref('all')
 
-const roleSearch = ref('')
+const fuse = computed(
+  () => new Fuse(rolesStore.roles, { keys: ['name', 'description'], threshold: 0.4 }),
+)
+
+const allUsers = computed(() => {
+  const users = new Set()
+  rolesStore.roles.forEach((r) => r.users.forEach((u) => users.add(u.name)))
+  return Array.from(users).sort()
+})
+
+const allZones = computed(() => {
+  const zones = new Set()
+  rolesStore.roles.forEach((r) => r.zones.forEach((z) => zones.add(z.name)))
+  return Array.from(zones).sort()
+})
+
+const userFilterOptions = computed(() => [
+  { key: 'all', label: 'Todos' },
+  ...allUsers.value.map((u) => ({ key: u, label: u })),
+])
+
+const zoneFilterOptions = computed(() => [
+  { key: 'all', label: 'Todas' },
+  ...allZones.value.map((z) => ({ key: z, label: z })),
+])
 
 const filteredRoles = computed(() => {
-  const cleanInput = roleSearch.value.trim()
+  const cleanSearch = search.value.trim()
+  let results =
+    cleanSearch.length > 0 ? fuse.value.search(cleanSearch).map((r) => r.item) : rolesStore.roles
 
-  if (cleanInput.length === 0) return roles
+  if (activeStatusFilter.value !== null) {
+    results = results.filter((r) => r.enabled === (activeStatusFilter.value === 'active'))
+  }
 
-  return fuzzyRoles.search(cleanInput).map((result) => result.item)
+  if (activeUserFilter.value !== 'all') {
+    results = results.filter((r) => r.users.some((u) => u.name === activeUserFilter.value))
+  }
+
+  if (activeZoneFilter.value !== 'all') {
+    results = results.filter((r) => r.zones.some((z) => z.name === activeZoneFilter.value))
+  }
+
+  return results
 })
 
 const selectedRole = ref(null)
+
+function openDetailsModal(role) {
+  selectedRole.value = role
+}
+
+function closeDetailsModal() {
+  selectedRole.value = null
+}
+
+async function handleDelete(role) {
+  await rolesStore.deleteRole(role.id)
+  closeDetailsModal()
+}
+
+const isCreating = ref(false)
+function openCreateModal() {
+  isCreating.value = true
+}
+function closeCreateModal() {
+  isCreating.value = false
+}
 </script>
 
 <template>
-  <div class="flex size-full flex-row space-x-2.5">
-    <div
-      class="flex flex-col shrink-0 bg-white w-86.25 h-full shadow-md rounded-4xl overflow-hidden"
+  <div class="flex flex-col gap-6 size-full">
+    <role-details v-if="selectedRole" :role="selectedRole" @delete="handleDelete" @close="closeDetailsModal" />
+    <role-details v-if="isCreating" :role="rolesStore.createEmpty()" @create="closeCreateModal" @close="closeCreateModal" />
+
+    <!-- Main content card -->
+    <base-table
+      :columns="['rol', 'usuarios asignados', 'zonas restringidas', 'estatus']"
+      grid-cols="grid-cols-[30%_25%_30%_15%]"
     >
-      <div class="border-b border-gray-300 p-8">
-        <div class="relative group">
-          <magnifying-glass-icon
-            class="absolute top-1/2 -translate-y-1/2 left-5 size-6 pointer-events-none"
-            :class="{
-              'text-black': roleSearch.length > 0,
-              'text-gray-500': roleSearch.length === 0,
-            }"
+      <template #filters>
+        <div class="flex items-center gap-3">
+          <search-input v-model="search" placeholder="Buscar rol..." class="flex-1" />
+          <filter-dropdown
+            v-model="activeUserFilter"
+            label="Usuario"
+            :options="userFilterOptions"
           />
-          <input
-            class="w-full pr-5 pl-13.5 py-2.5 border-gray-300 bg-white border rounded-4xl placeholder:font-medium placeholder:text-gray-500"
-            type="text"
-            placeholder="Buscar Roles..."
-            v-model="roleSearch"
-          />
+          <filter-dropdown v-model="activeZoneFilter" label="Zona" :options="zoneFilterOptions" />
+          <div class="flex flex-row items-center gap-2">
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Activo"
+              value="active"
+              :count="rolesStore.activeCount"
+              dot-class="bg-green-500"
+              active-class="border-green-300 bg-green-50 text-green-700"
+            />
+            <filter-toggle
+              v-model="activeStatusFilter"
+              label="Inactivo"
+              value="inactive"
+              :count="rolesStore.inactiveCount"
+              dot-class="bg-gray-400"
+              active-class="border-gray-400 bg-gray-100 text-gray-700"
+            />
+          </div>
+          <button
+            class="flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary-hover text-white text-sm font-medium px-4 py-2 rounded-4xl transition-colors shrink-0"
+            @click="openCreateModal"
+          >
+            <plus-icon class="size-4" />
+            Agregar Rol
+          </button>
         </div>
-      </div>
-      <div class="flex-1 min-h-62">
-        <button
+      </template>
+
+      <template #rows>
+        <div
           v-for="role in filteredRoles"
           :key="role.id"
-          class="px-8 py-3 hover:bg-gray-50 w-full text-left"
+          class="grid grid-cols-[30%_25%_30%_15%] border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer items-center"
+          role="button"
+          @click="openDetailsModal(role)"
         >
-          {{ role.name }}
-        </button>
-      </div>
-      <div class="border-t border-gray-300 p-8">
-        <button
-          class="bg-brand-secondary hover:bg-brand-secondary-hover flex flex-row w-full text-white space-x-2.5 rounded-4xl p-2.5 justify-center"
-        >
-          <plus-icon class="size-6" /><span class="text-nowrap">Crear Rol</span>
-        </button>
-      </div>
-    </div>
-    <div class="flex flex-1 shrink-0 flex-col space-y-2.5">
-      <div class="bg-white shadow-md rounded-4xl px-12 py-8">
-        <p class="font-semibold">Editar Rol</p>
-        <input type="text" />
-      </div>
-      <div class="flex flex-1 flex-col bg-white shadow-md rounded-4xl">
-        <div class="flex flex-row rounded-t-4xl bg-gray-50 overflow-hidden">
-          <button class="bg-gray-50 rounded-t-4xl text-nowrap">Asignar Zonas Permitidas</button>
+          <!-- Role name + description -->
+          <div class="px-6 py-4">
+            <p class="text-sm font-medium text-gray-900">{{ role.name }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ role.description }}</p>
+          </div>
+
+          <!-- Assigned users -->
+          <div class="px-6 py-4">
+            <overflow-badge-list :items="role.users.map((u) => u.name)" />
+          </div>
+
+          <!-- Restricted zones -->
+          <div class="px-6 py-4">
+            <overflow-badge-list :items="role.zones.map((z) => z.name)" />
+          </div>
+
+          <!-- Status pill -->
+          <div class="px-6 py-4 w-full">
+            <pill-select v-model="role.enabled" :options="roleStatusOptions" />
+          </div>
         </div>
-      </div>
-    </div>
+
+        <div v-if="filteredRoles.length === 0" class="px-6 py-12 text-center text-sm text-gray-400">
+          No se encontraron roles
+        </div>
+      </template>
+    </base-table>
   </div>
 </template>
 
